@@ -1,0 +1,24 @@
+.next-move {
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid #818cf8;
+  border-radius: 18px;
+  background: rgba(99, 102, 241, 0.16);
+}
+
+.next-move > p:nth-child(2) {
+  margin: 0 0 16px;
+  color: #f8fafc;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.next-move button {
+  width: 100%;
+  padding: 13px;
+  border: 0;
+  border-radius: 14px;
+  color: #111827;
+  background: #c7d2fe;
+  font-weight: 700;
+}

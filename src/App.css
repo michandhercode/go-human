@@ -1,0 +1,241 @@
+:root {
+  font-family: Arial, sans-serif;
+  color: #f8fafc;
+  background: #101827;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #101827;
+}
+
+button,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app {
+  width: min(100%, 480px);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 28px 20px 40px;
+  background: linear-gradient(180deg, #17233d 0%, #101827 55%);
+}
+
+.hero {
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: #a5b4fc;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2.25rem;
+}
+
+.subtitle {
+  margin: 14px auto 24px;
+  max-width: 330px;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+textarea {
+  width: 100%;
+  min-height: 140px;
+  resize: vertical;
+  padding: 16px;
+  border: 1px solid #475569;
+  border-radius: 18px;
+  outline: none;
+  color: #f8fafc;
+  background: #1e293b;
+}
+
+textarea:focus {
+  border-color: #a5b4fc;
+}
+
+.hero > button {
+  width: 100%;
+  margin-top: 14px;
+  padding: 15px;
+  border: 0;
+  border-radius: 14px;
+  color: #111827;
+  background: #c7d2fe;
+  font-weight: 700;
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.quick-actions button {
+  min-height: 78px;
+  padding: 10px 6px;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  color: #e2e8f0;
+  background: #1e293b;
+}
+
+.moments {
+  margin-top: 34px;
+}
+
+.empty-state {
+  padding: 22px;
+  border: 1px dashed #475569;
+  border-radius: 16px;
+  color: #cbd5e1;
+  line-height: 1.5;
+  background: rgba(30, 41, 59, 0.55);
+}
+
+.response {
+  margin: 16px 0 0;
+  padding: 14px;
+  border-radius: 14px;
+  color: #e0e7ff;
+  background: rgba(99, 102, 241, 0.2);
+  line-height: 1.5;
+}
+
+.save-button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid #818cf8;
+  border-radius: 14px;
+  color: #c7d2fe;
+  background: transparent;
+  font-weight: 700;
+}
+
+.moments-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.moments-heading span {
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.moments-list {
+  display: grid;
+  gap: 10px;
+}
+
+.moment-card {
+  display: flex;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 16px;
+  background: #1e293b;
+  color: #e2e8f0;
+}
+
+.moment-card p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.next-move {
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid #818cf8;
+  border-radius: 18px;
+  background: rgba(99, 102, 241, 0.16);
+}
+
+.next-move > p:nth-child(2) {
+  margin: 0 0 16px;
+  color: #f8fafc;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.next-move button {
+  width: 100%;
+  padding: 13px;
+  border: 0;
+  border-radius: 14px;
+  color: #111827;
+  background: #c7d2fe;
+  font-weight: 700;
+}
+
+.progress-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  padding: 16px;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  background: rgba(30, 41, 59, 0.7);
+}
+
+.progress-card .eyebrow {
+  margin-bottom: 4px;
+}
+
+.progress-card strong {
+  font-size: 1.1rem;
+}
+
+.progress-card span {
+  padding: 8px 10px;
+  border-radius: 999px;
+  color: #fef3c7;
+  background: rgba(245, 158, 11, 0.18);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.reflection {
+  margin: 0 0 12px;
+  color: #c7d2fe;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.tagline {
+  margin: 0 0 20px;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.hero > button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.error-message {
+  margin: 14px 0 0;
+  color: #fecaca;
+  line-height: 1.5;
+}
