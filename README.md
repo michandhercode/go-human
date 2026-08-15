@@ -70,10 +70,6 @@ npm run dev
 
 Then just open the local URL Vite gives you.
 
-## API Key Note
-
-The API key is stored in the `.env` file so it's hidden from the frontend code. I added `.env` to the `.gitignore` so you don't accidentally leak your key to GitHub.
-
 ## Project Status
 
 This is a hackathon project I made myself, so it's definitely still a work in progress. Expect some bugs and changes while I keep messing with the code.

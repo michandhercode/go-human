@@ -112,26 +112,6 @@ textarea:focus {
   background: rgba(30, 41, 59, 0.55);
 }
 
-.response {
-  margin: 16px 0 0;
-  padding: 14px;
-  border-radius: 14px;
-  color: #e0e7ff;
-  background: rgba(99, 102, 241, 0.2);
-  line-height: 1.5;
-}
-
-.save-button {
-  width: 100%;
-  margin-top: 10px;
-  padding: 12px;
-  border: 1px solid #818cf8;
-  border-radius: 14px;
-  color: #c7d2fe;
-  background: transparent;
-  font-weight: 700;
-}
-
 .moments-heading {
   display: flex;
   align-items: center;
@@ -162,22 +142,160 @@ textarea:focus {
   line-height: 1.5;
 }
 
-.next-move {
+.ai-response {
   margin-top: 24px;
-  padding: 20px;
+  display: grid;
+  gap: 18px;
+}
+
+.ai-bubble {
+  padding: 18px 20px;
   border: 1px solid #818cf8;
   border-radius: 18px;
   background: rgba(99, 102, 241, 0.16);
 }
 
-.next-move > p:nth-child(2) {
-  margin: 0 0 16px;
+.ai-message {
+  margin: 0;
   color: #f8fafc;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.options-heading {
+  margin: 0 0 12px;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.options-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.option-card {
+  padding: 18px;
+  border: 1px solid #334155;
+  border-radius: 18px;
+  background: #1e293b;
+}
+
+.option-card h3 {
+  margin: 0 0 6px;
+  color: #f8fafc;
+  font-size: 1.05rem;
+}
+
+.option-card > p {
+  margin: 0 0 14px;
+  color: #cbd5e1;
   line-height: 1.5;
 }
 
-.next-move button {
+.option-duration {
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #a5b4fc;
+  background: rgba(165, 180, 252, 0.14);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.option-card button {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border: 0;
+  border-radius: 14px;
+  color: #111827;
+  background: #c7d2fe;
+  font-weight: 700;
+}
+
+.action-session {
+  margin-top: 24px;
+  padding: 28px 22px;
+  border: 1px solid #818cf8;
+  border-radius: 20px;
+  text-align: center;
+  background: rgba(99, 102, 241, 0.16);
+}
+
+.action-description {
+  margin: 0 0 20px;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+.session-timer {
+  margin: 0 0 24px;
+  color: #f8fafc;
+  font-size: 3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.session-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.session-buttons button {
+  padding: 13px;
+  border: 0;
+  border-radius: 14px;
+  font-weight: 700;
+}
+
+.session-buttons button:first-child {
+  color: #111827;
+  background: #c7d2fe;
+}
+
+.giveup-button {
+  color: #fecaca;
+  background: rgba(248, 113, 113, 0.14) !important;
+  border: 1px solid rgba(248, 113, 113, 0.4) !important;
+}
+
+.session-hint {
+  margin: 18px 0 0;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.action-session--done {
+  border-color: #4ade80;
+  background: rgba(74, 222, 128, 0.14);
+}
+
+.celebrate {
+  margin: 0 0 6px;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.done-title {
+  margin: 0 0 10px;
+  color: #cbd5e1;
+}
+
+.xp-preview {
+  margin: 0 0 22px;
+  color: #fef3c7;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.action-session--done button {
   width: 100%;
   padding: 13px;
   border: 0;
@@ -185,6 +303,23 @@ textarea:focus {
   color: #111827;
   background: #c7d2fe;
   font-weight: 700;
+}
+
+.moment-content {
+  display: grid;
+  gap: 4px;
+}
+
+.moment-title {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.moment-description {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
 
 .progress-card {
@@ -213,13 +348,6 @@ textarea:focus {
   background: rgba(245, 158, 11, 0.18);
   font-size: 0.85rem;
   font-weight: 700;
-}
-
-.reflection {
-  margin: 0 0 12px;
-  color: #c7d2fe;
-  font-size: 0.95rem;
-  line-height: 1.5;
 }
 
 .tagline {
