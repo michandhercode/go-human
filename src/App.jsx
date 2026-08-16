@@ -70,6 +70,12 @@ function App() {
   const [error, setError] = useState("");
   const [activeAction, setActiveAction] = useState(null);
 
+  // --- "GIVE ME ANOTHER MOVE" — additive to nextMove, no separate storage.
+  // isGeneratingAnotherMove/anotherMoveError are reset any time nextMove
+  // itself is reset (same places setNextMove(null) already happens below).
+  const [isGeneratingAnotherMove, setIsGeneratingAnotherMove] = useState(false);
+  const [anotherMoveError, setAnotherMoveError] = useState("");
+
   // --- first-time welcome/hook page ---
   const [hasOnboarded, setHasOnboarded] = useState(
     () => localStorage.getItem(ONBOARDING_STORAGE_KEY) === "true"
@@ -337,6 +343,7 @@ function App() {
     setMessage(prompt);
     setNextMove(null);
     setError("");
+    setAnotherMoveError("");
   }
 
   async function createNextMove() {
@@ -349,6 +356,7 @@ function App() {
     setIsThinking(true);
     setError("");
     setNextMove(null);
+    setAnotherMoveError("");
     setCompanionMood("thinking");
 
     try {
@@ -376,6 +384,49 @@ function App() {
     } finally {
       setIsThinking(false);
       setCompanionMood("idle");
+    }
+  }
+
+  // "GIVE ME ANOTHER MOVE" — reuses the existing Groq-backed API
+  // architecture to ask GO HUMAN for exactly one more contextual quest,
+  // grounded in the original message + the options already shown, then
+  // appends it to the existing options. Never replaces existing options.
+  async function requestAnotherMove() {
+    if (!nextMove) return;
+
+    playSound("click");
+    setIsGeneratingAnotherMove(true);
+    setAnotherMoveError("");
+
+    try {
+      const apiUrl = import.meta.env.DEV
+        ? "http://localhost:3001/api/another-move"
+        : "/api/another-move";
+
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message,
+          existingOptions: nextMove.options || [],
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Could not think of another move right now.");
+      }
+
+      setNextMove((current) =>
+        current ? { ...current, options: [...(current.options || []), data] } : current
+      );
+    } catch (err) {
+      setAnotherMoveError(err.message || "Could not think of another move right now.");
+    } finally {
+      setIsGeneratingAnotherMove(false);
     }
   }
 
@@ -566,6 +617,7 @@ function App() {
     setActiveAction(null);
     setNextMove(null);
     setMessage("");
+    setAnotherMoveError("");
   }
 
   // Fires once, the very first time a user taps LET'S GO. Sets a dedicated
@@ -876,6 +928,7 @@ function App() {
                     setMessage(event.target.value);
                     setNextMove(null);
                     setError("");
+                    setAnotherMoveError("");
                   }}
                   placeholder="Tell me what's up..."
                 />
@@ -924,6 +977,9 @@ function App() {
                 activeAvatar={activeAvatar}
                 companionMood={companionMood}
                 onStartAction={startAction}
+                onAnotherMove={requestAnotherMove}
+                isGeneratingAnotherMove={isGeneratingAnotherMove}
+                anotherMoveError={anotherMoveError}
               />
             </>
           )}

@@ -75,14 +75,15 @@ Each option needs:
 - a short, human "title" that sounds like something a friend would text (not a task-manager label)
 - a one-line, conversational "description" — natural, not instructional or corporate, that reads as a direct, logical next step for THIS situation
 - a realistic "duration" in minutes that actually matches the action's effort — use whatever fits (2, 5, 10, 15, etc.), don't default everything to 10.
+- a short "why" (one honest sentence) explaining, like a friend would if you asked "wait why though" — grounded in THIS specific situation, never generic encouragement.
 
 Return ONLY valid JSON, no markdown fences, no extra text, in exactly this shape:
 {
   "category": "FOCUS" | "CONNECT" | "RECHARGE" | "NEXT MOVE",
   "message": "short, warm, human response with personality",
   "options": [
-    { "title": "...", "description": "...", "duration": number },
-    { "title": "...", "description": "...", "duration": number }
+    { "title": "...", "description": "...", "duration": number, "why": "..." },
+    { "title": "...", "description": "...", "duration": number, "why": "..." }
   ]
 }
 `;
@@ -99,11 +100,13 @@ function fallbackNextMove(message) {
           title: "Start tiny",
           description: "Open the work and do just the first small piece. That's it.",
           duration: 10,
+          why: "Starting is the actual blocker, not finishing — this gets you moving without asking for the whole thing.",
         },
         {
           title: "Reset first",
           description: "Put your phone in another room, get some water, then come back.",
           duration: 5,
+          why: "Sometimes the focus problem is really a distraction problem, so clearing that first makes the next step easier.",
         },
       ],
     };
@@ -118,11 +121,13 @@ function fallbackNextMove(message) {
           title: "Text someone",
           description: "Send one trusted person a quick message, even just 'hey, thinking of you.'",
           duration: 5,
+          why: "Low-pressure and quick, so it doesn't feel like a big ask when you're already feeling low.",
         },
         {
           title: "Call someone",
           description: "Call a friend or family member and just talk for a bit.",
           duration: 10,
+          why: "A real conversation cuts through the isolation faster than sitting with it alone.",
         },
       ],
     };
@@ -137,11 +142,13 @@ function fallbackNextMove(message) {
           title: "Quick reset",
           description: "Step away from the screen, drink some water, and just breathe for a bit.",
           duration: 5,
+          why: "You said you're running on empty, so this is about refilling the tank before anything else.",
         },
         {
           title: "Move your body",
           description: "Take a short walk outside, even just around the block.",
           duration: 10,
+          why: "Movement is a fast way to shake off stress when your head's too full to think straight.",
         },
       ],
     };
@@ -155,11 +162,13 @@ function fallbackNextMove(message) {
         title: "Pause and breathe",
         description: "Stand up, take five slow breaths, and let your shoulders drop.",
         duration: 5,
+        why: "When everything feels like a lot, slowing your body down for a minute makes the next step less overwhelming.",
       },
       {
         title: "Change your scenery",
         description: "Step outside or into another room for a few minutes.",
         duration: 10,
+        why: "A change of scenery can loosen up a stuck headspace without needing to solve anything yet.",
       },
     ],
   };
