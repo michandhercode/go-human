@@ -1,5 +1,97 @@
+import { useState } from "react";
 import { calculateOutcomeXp } from "../utils/xp";
+import { readImageAsDataUrl } from "../utils/journal";
 import Companion from "./Companion";
+
+/**
+ * Small inline "want to remember this?" prompt shown after a quest is
+ * reported done/in-progress. Entirely optional — skipping it (by just
+ * tapping the existing close button) leaves XP/reward logic untouched.
+ */
+function SaveToJournalPrompt({ onSave }) {
+  const [showPhotoInput, setShowPhotoInput] = useState(false);
+  const [showNoteInput, setShowNoteInput] = useState(false);
+  const [note, setNote] = useState("");
+  const [photo, setPhoto] = useState(null);
+  const [isProcessingPhoto, setIsProcessingPhoto] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handlePhotoChange(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    setIsProcessingPhoto(true);
+    setError("");
+    try {
+      const dataUrl = await readImageAsDataUrl(file);
+      setPhoto(dataUrl);
+    } catch (err) {
+      setError(err.message || "Could not use that photo.");
+    } finally {
+      setIsProcessingPhoto(false);
+    }
+  }
+
+  return (
+    <div className="journal-quest-prompt">
+      <p className="journal-quest-prompt-question">Want to remember this?</p>
+
+      <div className="journal-quest-prompt-toggles">
+        <button
+          type="button"
+          className={`pixel-btn journal-chip${showPhotoInput ? " journal-chip--active" : ""}`}
+          onClick={() => setShowPhotoInput((current) => !current)}
+        >
+          📸 ADD PHOTO
+        </button>
+        <button
+          type="button"
+          className={`pixel-btn journal-chip${showNoteInput ? " journal-chip--active" : ""}`}
+          onClick={() => setShowNoteInput((current) => !current)}
+        >
+          ✏️ ADD NOTE
+        </button>
+      </div>
+
+      {showNoteInput && (
+        <textarea
+          className="pixel-input journal-editor-textarea"
+          value={note}
+          onChange={(event) => setNote(event.target.value)}
+          placeholder="I actually went for a run today."
+          rows={2}
+        />
+      )}
+
+      {showPhotoInput &&
+        (photo ? (
+          <div className="journal-editor-photo-preview journal-editor-photo-preview--inline">
+            <img src={photo} alt="" />
+            <button type="button" className="pixel-btn pixel-btn--danger" onClick={() => setPhoto(null)}>
+              REMOVE
+            </button>
+          </div>
+        ) : (
+          <label className="pixel-btn journal-photo-upload-btn">
+            {isProcessingPhoto ? "PROCESSING..." : "CHOOSE A PHOTO"}
+            <input type="file" accept="image/*" onChange={handlePhotoChange} disabled={isProcessingPhoto} hidden />
+          </label>
+        ))}
+
+      {error && <p className="error-message">{error}</p>}
+
+      <button
+        type="button"
+        className="pixel-btn pixel-btn--primary journal-quest-prompt-save"
+        onClick={() => onSave({ note, photo })}
+        disabled={isProcessingPhoto}
+      >
+        📖 SAVE TO JOURNAL
+      </button>
+    </div>
+  );
+}
 
 function ActionSession({
   activeAction,
@@ -12,8 +104,16 @@ function ActionSession({
   onMakeSmaller,
   onTryAgain,
   onClose,
+  onSaveToJournal,
 }) {
   if (!activeAction) return null;
+
+  // SaveToJournalPrompt keeps its own draft note/photo/toggle state. Keying
+  // it on the values that identify "a genuinely new commitment" (fresh
+  // quest, "try again", or "make it smaller") makes React remount it —
+  // and therefore reset that draft state — automatically, with no extra
+  // state or effect needed here.
+  const journalPromptKey = `${activeAction.title}-${activeAction.optionSeconds}`;
 
   const sessionMinutes = String(Math.floor(activeAction.secondsLeft / 60)).padStart(2, "0");
   const sessionSeconds = String(activeAction.secondsLeft % 60).padStart(2, "0");
@@ -136,6 +236,12 @@ function ActionSession({
         <p className="done-title">{activeAction.title}</p>
         <p className="xp-preview">+{calculateOutcomeXp(xpForCommitment, "done")} XP</p>
 
+        {activeAction.journalSaved ? (
+          <p className="journal-saved-note">📖 Saved to your Journal</p>
+        ) : (
+          <SaveToJournalPrompt key={journalPromptKey} onSave={onSaveToJournal} />
+        )}
+
         <button type="button" className="pixel-btn pixel-btn--primary" onClick={onClose}>
           NICE, I'M DONE ✨
         </button>
@@ -153,6 +259,12 @@ function ActionSession({
         <p className="celebrate">That still counts. Progress is progress. 🌱</p>
         <p className="done-title">{activeAction.title}</p>
         <p className="xp-preview">+{calculateOutcomeXp(xpForCommitment, "progress")} XP</p>
+
+        {activeAction.journalSaved ? (
+          <p className="journal-saved-note">📖 Saved to your Journal</p>
+        ) : (
+          <SaveToJournalPrompt key={journalPromptKey} onSave={onSaveToJournal} />
+        )}
 
         <button type="button" className="pixel-btn pixel-btn--primary" onClick={onClose}>
           OKAY, I'M DONE ✨

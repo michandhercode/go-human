@@ -659,6 +659,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 14px;
 }
@@ -705,6 +706,12 @@ button {
 .sound-toggle-btn.sound-toggle-btn--off {
   color: var(--muted);
   background: var(--panel);
+}
+
+.info-toggle-btn {
+  padding: 9px 11px;
+  min-width: 34px;
+  text-align: center;
 }
 
 /* ============================= SOUND POPOVER ============================= */
@@ -1052,6 +1059,7 @@ button {
 .companion--sm { width: 56px; height: 56px; }
 .companion--md { width: 84px; height: 84px; }
 .companion--lg { width: 120px; height: 120px; }
+.companion--xl { width: 148px; height: 148px; }
 
 .companion-shadow {
   position: absolute;
@@ -1352,6 +1360,90 @@ h1 {
   line-height: 1.5;
   text-shadow: var(--on-world-shadow);
   transition: color 0.4s ease;
+}
+
+/* ============================= WELCOME (FIRST-TIME HOOK) ============================= */
+/* Sits directly on the pixel-world sky, same as .hero, so it uses the same
+   --on-world-* tokens and reacts to Day/Night + equipped World Theme
+   automatically. Deliberately short — this is a hook, not documentation. */
+.welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px 4px 12px;
+}
+
+.welcome-avatar {
+  margin-bottom: 18px;
+}
+
+.welcome-logo {
+  margin: 0 0 18px;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--on-world-heading);
+  text-shadow: var(--on-world-shadow);
+  transition: color 0.4s ease;
+}
+
+.welcome-hook {
+  margin: 0;
+  max-width: 300px;
+  font-family: var(--font-pixel);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--on-world-heading);
+  text-shadow: var(--on-world-shadow);
+  transition: color 0.4s ease;
+}
+
+.welcome-cta {
+  max-width: 280px;
+  margin-top: 28px;
+  font-size: 0.72rem;
+  padding: 16px 14px;
+}
+
+.welcome-subline {
+  margin: 16px 0 0;
+  max-width: 260px;
+  color: var(--on-world-text);
+  font-size: 0.8rem;
+  text-shadow: var(--on-world-shadow);
+  transition: color 0.4s ease;
+}
+
+/* ============================= INFO MODAL ============================= */
+/* Uses .modal.info-modal (not just .info-modal) so this max-width wins over
+   the later, lower-specificity base .modal rule in the cascade. */
+.modal.info-modal {
+  max-width: 360px;
+  max-height: min(80vh, 560px);
+  display: flex;
+  flex-direction: column;
+}
+
+.info-modal-body {
+  overflow-y: auto;
+  text-align: left;
+  margin-bottom: 16px;
+  padding-right: 4px;
+}
+
+.info-modal-body p {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+.info-modal-body h3 {
+  margin: 0 0 6px;
+  color: var(--cream);
+  font-family: var(--font-pixel);
+  font-size: 0.62rem;
+  letter-spacing: 0.02em;
 }
 
 .pixel-input {
@@ -1972,5 +2064,453 @@ h1 {
 
   .top-controls {
     flex-wrap: wrap;
+  }
+}
+
+/* ============================= JOURNAL ENTRY POINT (main page) ============================= */
+.journal-entry-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  text-align: left;
+  background: var(--panel-raised);
+  cursor: pointer;
+}
+
+.journal-entry-card:hover {
+  transform: translateY(-2px);
+}
+
+.journal-entry-card-title {
+  font-family: var(--font-pixel);
+  font-size: 0.68rem;
+  color: var(--cream);
+  letter-spacing: 0.03em;
+}
+
+.journal-entry-card-body {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.journal-entry-card-count {
+  color: var(--muted);
+  font-size: 0.72rem;
+  opacity: 0.85;
+}
+
+.journal-entry-card-cta {
+  margin-top: 8px;
+  color: var(--accent);
+  font-family: var(--font-pixel);
+  font-size: 0.6rem;
+  letter-spacing: 0.02em;
+}
+
+/* ============================= JOURNAL PAGE ============================= */
+.journal {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.journal-back-btn {
+  align-self: flex-start;
+}
+
+.journal-header {
+  position: relative;
+  padding: 22px 18px 20px;
+  border: 3px solid var(--panel-border);
+  background: var(--panel);
+  box-shadow: 4px 4px 0 0 var(--panel-border);
+  text-align: center;
+}
+
+.journal-header-companion {
+  position: absolute;
+  top: -10px;
+  right: 10px;
+}
+
+.journal-header-eyebrow {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+}
+
+.journal-tagline {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.journal-customize-btn {
+  font-size: 0.55rem;
+}
+
+/* Journal Covers — a light accent shift on the header only, so the world's
+   Day/Night lighting and equipped World Theme always stay in charge of the
+   overall palette (see #14 — no separate visual language). */
+.journal-cover--nature .journal-header { border-color: #3fae5f; box-shadow: 4px 4px 0 0 #3fae5f; }
+.journal-cover--nature .journal-header-eyebrow { color: #4ade80; }
+.journal-cover--retro .journal-header { border-color: #e0459d; box-shadow: 4px 4px 0 0 #e0459d; }
+.journal-cover--retro .journal-header-eyebrow { color: #f472b6; }
+.journal-cover--golden .journal-header { border-color: #e8a521; box-shadow: 4px 4px 0 0 #e8a521; }
+.journal-cover--golden .journal-header-eyebrow { color: #facc15; }
+
+/* Page Themes — tints the scrapbook cards themselves. */
+.journal-theme--nature .journal-card { border-color: #3fae5f; }
+.journal-theme--nature .journal-card-badge--xp { color: #86efac; }
+.journal-theme--sunset .journal-card { border-color: #e8a521; }
+.journal-theme--sunset .journal-card-badge--xp { color: #ffcf5c; }
+.journal-theme--night .journal-card { background: #16213b; }
+.journal-theme--retro .journal-card { border-color: #f472b6; }
+.journal-theme--retro .journal-card-badge--xp { color: #f9a8d4; }
+
+/* ============================= JOURNAL EMPTY STATE ============================= */
+.journal-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 34px 20px;
+  text-align: center;
+}
+
+.journal-empty-companion {
+  margin-bottom: 8px;
+}
+
+.journal-empty-title {
+  margin: 0;
+  color: var(--cream);
+  font-family: var(--font-pixel);
+  font-size: 0.72rem;
+}
+
+.journal-empty-body {
+  margin: 0 0 10px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 0.88rem;
+}
+
+.journal-empty-cta {
+  margin-top: 4px;
+}
+
+/* ============================= JOURNAL GRID / CARDS ============================= */
+.journal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.journal-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  text-align: left;
+  background: var(--cream);
+  color: var(--ink);
+  border: 3px solid var(--panel-border);
+  box-shadow: 4px 4px 0 0 var(--panel-border);
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+
+.journal-card:hover {
+  transform: translateY(-3px) rotate(0deg);
+}
+
+.journal-card:nth-child(3n + 1) { transform: rotate(-1.2deg); }
+.journal-card:nth-child(3n + 2) { transform: rotate(0.8deg); }
+.journal-card:nth-child(3n) { transform: rotate(-0.4deg); }
+.journal-card:nth-child(3n + 1):hover,
+.journal-card:nth-child(3n + 2):hover,
+.journal-card:nth-child(3n):hover {
+  transform: translateY(-3px) rotate(0deg);
+}
+
+.journal-card--quest {
+  background: #fff9e8;
+}
+
+.journal-card-sticker {
+  position: absolute;
+  top: -12px;
+  right: -8px;
+  font-size: 1.6rem;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.25));
+}
+
+.journal-card-kicker {
+  margin: 0;
+  color: #8a7a4f;
+  font-family: var(--font-pixel);
+  font-size: 0.52rem;
+  letter-spacing: 0.05em;
+}
+
+.journal-photo {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #ece2c8;
+}
+
+.journal-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.journal-photo--pixel {
+  border: 3px solid var(--panel-border);
+  image-rendering: pixelated;
+}
+
+.journal-photo--polaroid {
+  padding: 8px 8px 22px;
+  background: #fff;
+  border: 1px solid #ddd;
+  box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.25);
+}
+
+.journal-photo--tape {
+  border: 2px dashed #c9b98a;
+  position: relative;
+}
+
+.journal-photo--tape::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-3deg);
+  width: 60px;
+  height: 18px;
+  background: rgba(255, 244, 200, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.journal-photo--sticker {
+  border: 3px solid var(--accent);
+  border-radius: 8px;
+}
+
+.journal-card-note {
+  margin: 0;
+  font-style: italic;
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+
+.journal-card-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.journal-card-badge {
+  padding: 3px 8px;
+  border: 2px solid var(--panel-border);
+  background: rgba(0, 0, 0, 0.06);
+  color: #4a3f28;
+  font-size: 0.6rem;
+  font-family: var(--font-pixel);
+  letter-spacing: 0.02em;
+}
+
+.journal-card-badge--xp {
+  color: #a97d1f;
+}
+
+.journal-card-date {
+  margin: 2px 0 0;
+  color: #8a7a4f;
+  opacity: 0.8;
+  font-size: 0.7rem;
+}
+
+.journal-add-fab {
+  align-self: center;
+  min-width: 220px;
+}
+
+/* ============================= JOURNAL EDITOR ============================= */
+.journal-editor {
+  width: 100%;
+  max-width: 400px;
+  max-height: 86vh;
+  overflow-y: auto;
+  text-align: left;
+  -webkit-overflow-scrolling: touch;
+}
+
+.journal-editor-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.journal-editor-quest-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.journal-field-label {
+  margin-top: 8px;
+  color: var(--accent);
+  font-family: var(--font-pixel);
+  font-size: 0.52rem;
+  letter-spacing: 0.05em;
+}
+
+.journal-editor-textarea {
+  min-height: 70px;
+}
+
+input.pixel-input {
+  min-height: auto;
+  padding: 10px 12px;
+}
+
+.journal-mood-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.journal-chip {
+  padding: 6px 10px;
+  font-size: 0.58rem;
+}
+
+.journal-chip--active {
+  background: var(--accent);
+  color: var(--ink);
+}
+
+.journal-photo-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+}
+
+.journal-editor-photo-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.journal-editor-photo-preview img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border: 3px solid var(--panel-border);
+}
+
+.journal-editor-photo-preview--inline img {
+  max-height: 140px;
+}
+
+.journal-sticker-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.journal-sticker-option {
+  width: 42px;
+  height: 42px;
+  font-size: 1.2rem;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--panel-border);
+  background: var(--panel-raised);
+}
+
+.journal-sticker-option--active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.journal-editor-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.journal-editor-delete {
+  margin-top: 10px;
+  width: 100%;
+}
+
+/* ============================= JOURNAL CUSTOMIZE DRAWER ============================= */
+.journal-customize-drawer {
+  padding-bottom: 28px;
+}
+
+/* ============================= SAVE-TO-JOURNAL (quest complete) ============================= */
+.journal-quest-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin: 14px 0;
+  padding: 14px;
+  border: 2px dashed var(--muted);
+  text-align: left;
+}
+
+.journal-quest-prompt-question {
+  margin: 0;
+  color: var(--cream);
+  font-family: var(--font-pixel);
+  font-size: 0.6rem;
+}
+
+.journal-quest-prompt-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.journal-quest-prompt-toggles .journal-chip {
+  font-size: 0.55rem;
+}
+
+.journal-quest-prompt-save {
+  width: 100%;
+}
+
+.journal-saved-note {
+  margin: 14px 0;
+  color: var(--success);
+  font-family: var(--font-pixel);
+  font-size: 0.6rem;
+}
+
+/* ============================= JOURNAL RESPONSIVE ============================= */
+@media (max-width: 380px) {
+  .journal-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .journal-editor-buttons {
+    grid-template-columns: 1fr;
   }
 }

@@ -13,6 +13,17 @@ import Moments from "./components/Moments";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModal";
 import LevelUpOverlay from "./components/LevelUpOverlay";
 import RewardUnlockToast from "./components/RewardUnlockToast";
+import WelcomePage from "./components/WelcomePage";
+import InfoPanel from "./components/InfoPanel";
+import TopControls from "./components/TopControls";
+import Journal from "./components/Journal";
+import {
+  JOURNAL_STORAGE_KEY,
+  JOURNAL_CUSTOMIZATION_STORAGE_KEY,
+  DEFAULT_JOURNAL_CUSTOMIZATION,
+  getEntryIcon,
+  makeJournalId,
+} from "./utils/journal";
 import {
   initAudio,
   isSoundEnabled,
@@ -28,6 +39,12 @@ import {
   setBgmVolume,
 } from "./utils/sounds";
 
+// Dedicated onboarding flag — the ONLY thing that decides whether the
+// first-time welcome/hook page shows. Never inferred from XP, moments, or
+// any other existing user data, so it can't accidentally re-trigger for
+// returning users.
+const ONBOARDING_STORAGE_KEY = "go-human-onboarded";
+
 function readUnlockedIdsForXp(xpValue) {
   const progress = getLevelProgress(xpValue);
   return ALL_REWARDS.filter((reward) => progress.level >= reward.unlockLevel).map((reward) => reward.id);
@@ -39,6 +56,12 @@ function App() {
   const [isThinking, setIsThinking] = useState(false);
   const [error, setError] = useState("");
   const [activeAction, setActiveAction] = useState(null);
+
+  // --- first-time welcome/hook page ---
+  const [hasOnboarded, setHasOnboarded] = useState(
+    () => localStorage.getItem(ONBOARDING_STORAGE_KEY) === "true"
+  );
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
 
   const [moments, setMoments] = useState(() => {
     const savedMoments = localStorage.getItem("go-human-moments");
@@ -59,6 +82,18 @@ function App() {
 
   const [selectedMomentIndexes, setSelectedMomentIndexes] = useState([]);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+
+  // --- Virtual Life Journal — entirely additive, own storage keys, never
+  // touches XP/rewards/onboarding/moments state above. ---
+  const [journalEntries, setJournalEntries] = useState(() => {
+    const saved = localStorage.getItem(JOURNAL_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [isJournalOpen, setIsJournalOpen] = useState(false);
+  const [journalCustomization, setJournalCustomization] = useState(() => {
+    const saved = localStorage.getItem(JOURNAL_CUSTOMIZATION_STORAGE_KEY);
+    return saved ? { ...DEFAULT_JOURNAL_CUSTOMIZATION, ...JSON.parse(saved) } : DEFAULT_JOURNAL_CUSTOMIZATION;
+  });
 
   // --- day/night environment (NOT a reward — the base world's lighting).
   // Day is always the default on a fresh install; only a previously saved
@@ -96,6 +131,14 @@ function App() {
   useEffect(() => {
     localStorage.setItem("go-human-moments", JSON.stringify(moments));
   }, [moments]);
+
+  useEffect(() => {
+    localStorage.setItem(JOURNAL_STORAGE_KEY, JSON.stringify(journalEntries));
+  }, [journalEntries]);
+
+  useEffect(() => {
+    localStorage.setItem(JOURNAL_CUSTOMIZATION_STORAGE_KEY, JSON.stringify(journalCustomization));
+  }, [journalCustomization]);
 
   useEffect(() => {
     localStorage.setItem("go-human-xp", xp);
@@ -507,6 +550,25 @@ function App() {
     setMessage("");
   }
 
+  // Fires once, the very first time a user taps LET'S GO. Sets a dedicated
+  // flag so reopening the app later goes straight to the main experience —
+  // it never touches XP, moments, rewards, or any other saved state.
+  function handleWelcomeStart() {
+    playSound("success");
+    localStorage.setItem(ONBOARDING_STORAGE_KEY, "true");
+    setHasOnboarded(true);
+  }
+
+  function openInfoPanel() {
+    playSound("click");
+    setIsInfoOpen(true);
+  }
+
+  function closeInfoPanel() {
+    playSound("click");
+    setIsInfoOpen(false);
+  }
+
   function toggleDayNight() {
     playSound("toggle");
     setDayNight((current) => (current === "day" ? "night" : "day"));
@@ -525,6 +587,61 @@ function App() {
   function selectAvatar(avatarId) {
     playSound("click");
     setSelectedAvatarId((current) => (current === avatarId ? null : avatarId));
+  }
+
+  function openJournal() {
+    playSound("drawer");
+    setIsJournalOpen(true);
+  }
+
+  function closeJournal() {
+    playSound("click");
+    setIsJournalOpen(false);
+  }
+
+  function addJournalEntry(entry) {
+    setJournalEntries((current) => [entry, ...current]);
+  }
+
+  function updateJournalEntry(id, updates) {
+    setJournalEntries((current) =>
+      current.map((entry) => (entry.id === id ? { ...entry, ...updates } : entry))
+    );
+  }
+
+  function deleteJournalEntry(id) {
+    setJournalEntries((current) => current.filter((entry) => entry.id !== id));
+  }
+
+  function setJournalCustomizationField(field, value) {
+    playSound("click");
+    setJournalCustomization((current) => ({ ...current, [field]: value }));
+  }
+
+  // Optional "want to remember this?" save, offered right after a quest is
+  // reported done/in-progress (see ActionSession). Never required — closing
+  // the session without saving leaves XP/reward logic completely untouched.
+  function saveActiveActionToJournal({ note, photo }) {
+    if (!activeAction || activeAction.journalSaved) return;
+
+    playSound("click");
+
+    const xpEarned = calculateOutcomeXp(activeAction.optionSeconds / 60, activeAction.outcome);
+
+    addJournalEntry({
+      id: makeJournalId(),
+      type: "quest",
+      title: activeAction.title,
+      category: activeAction.category,
+      icon: getEntryIcon(activeAction.category, activeAction.title),
+      note: note?.trim() || "",
+      photo: photo || null,
+      sticker: null,
+      xpEarned,
+      date: now(),
+    });
+
+    setActiveAction((current) => (current ? { ...current, journalSaved: true } : current));
   }
 
   function toggleMomentSelected(index) {
@@ -597,204 +714,172 @@ function App() {
       <PixelWorld themeId={activeTheme?.id} dayNight={dayNight} sunriseGlow={sunriseGlow} />
 
       <div className="app-content">
-        <div className="top-controls">
-          <button
-            type="button"
-            className="icon-toggle-btn"
-            onClick={toggleDayNight}
-            aria-label={dayNight === "day" ? "Switch to Night mode" : "Switch to Day mode"}
-          >
-            {dayNight === "day" ? "☀️ DAY" : "🌙 NIGHT"}
-          </button>
-
-          <button
-            type="button"
-            className="icon-toggle-btn rewards-trigger"
-            onClick={openRewardsDrawer}
-            aria-label="Open Reward Closet"
-          >
-            🎁 REWARDS
-          </button>
-
-          <div className="sound-popover-wrapper" ref={soundPopoverRef}>
-            <button
-              type="button"
-              className={`icon-toggle-btn sound-toggle-btn${
-                sfxOn || bgmOn ? "" : " sound-toggle-btn--off"
-              }`}
-              onClick={() => setIsSoundPopoverOpen((current) => !current)}
-              aria-label="Sound settings"
-              aria-expanded={isSoundPopoverOpen}
-            >
-              {sfxOn || bgmOn ? "🔊" : "🔇"} SOUND
-            </button>
-
-            {isSoundPopoverOpen && (
-              <div className="sound-popover pixel-frame">
-                <div className="sound-row">
-                  <span className="sound-row-label">🎵 BGM</span>
-                  <input
-                    type="range"
-                    className="sound-slider"
-                    min="0"
-                    max="100"
-                    step="1"
-                    value={Math.round(bgmVolume * 100)}
-                    onChange={handleBgmVolumeChange}
-                    disabled={!bgmOn}
-                    style={{ "--sound-fill": `${Math.round(bgmVolume * 100)}%` }}
-                    aria-label="Music volume"
-                  />
-                  <span className="sound-volume-value">{Math.round(bgmVolume * 100)}%</span>
-                  <button
-                    type="button"
-                    className={`sound-mute-btn${bgmOn ? "" : " sound-mute-btn--off"}`}
-                    onClick={toggleBgm}
-                    aria-label={bgmOn ? "Mute music" : "Unmute music"}
-                    aria-pressed={bgmOn}
-                  >
-                    {bgmOn ? "🔊" : "🔇"}
-                  </button>
-                </div>
-
-                <div className="sound-row">
-                  <span className="sound-row-label">✨ SFX</span>
-                  <input
-                    type="range"
-                    className="sound-slider"
-                    min="0"
-                    max="100"
-                    step="1"
-                    value={Math.round(sfxVolume * 100)}
-                    onChange={handleSfxVolumeChange}
-                    disabled={!sfxOn}
-                    style={{ "--sound-fill": `${Math.round(sfxVolume * 100)}%` }}
-                    aria-label="Sound effects volume"
-                  />
-                  <span className="sound-volume-value">{Math.round(sfxVolume * 100)}%</span>
-                  <button
-                    type="button"
-                    className={`sound-mute-btn${sfxOn ? "" : " sound-mute-btn--off"}`}
-                    onClick={toggleSfx}
-                    aria-label={sfxOn ? "Mute sound effects" : "Unmute sound effects"}
-                    aria-pressed={sfxOn}
-                  >
-                    {sfxOn ? "🔊" : "🔇"}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <XpHud xp={xp} levelProgress={levelProgress} justGainedXp={justGainedXp} />
-
-        <RewardsPanel
-          isOpen={isRewardsOpen}
-          onClose={() => setIsRewardsOpen(false)}
-          unlockedRewardIds={unlockedRewardIds}
-          activeTheme={activeTheme}
-          activeAvatar={activeAvatar}
-          onSelectTheme={selectTheme}
-          onSelectAvatar={selectAvatar}
+        <TopControls
+          dayNight={dayNight}
+          onToggleDayNight={toggleDayNight}
+          showRewards={hasOnboarded}
+          onOpenRewards={openRewardsDrawer}
+          sfxOn={sfxOn}
+          bgmOn={bgmOn}
+          sfxVolume={sfxVolume}
+          bgmVolume={bgmVolume}
+          onToggleSfx={toggleSfx}
+          onToggleBgm={toggleBgm}
+          onSfxVolumeChange={handleSfxVolumeChange}
+          onBgmVolumeChange={handleBgmVolumeChange}
+          isSoundPopoverOpen={isSoundPopoverOpen}
+          onToggleSoundPopover={() => setIsSoundPopoverOpen((current) => !current)}
+          soundPopoverRef={soundPopoverRef}
+          onOpenInfo={openInfoPanel}
         />
 
-        {!activeAction && (
-          <>
-            <section className="hero">
-              <div className="companion-stage companion-stage--hero">
-                <Companion avatar={activeAvatar} mood={companionMood} size="lg" />
-              </div>
-
-              <p className="eyebrow">GO HUMAN</p>
-              <p className="tagline">An AI that helps you live outside the screen.</p>
-              <h1>What's going on?</h1>
-              <p className="subtitle">
-                Tell GO HUMAN what's happening. It will help you choose your next small move.
-              </p>
-
-              <textarea
-                className="pixel-input"
-                value={message}
-                onChange={(event) => {
-                  setMessage(event.target.value);
-                  setNextMove(null);
-                  setError("");
-                }}
-                placeholder="Tell me what's up..."
-              />
-
-              <button
-                type="button"
-                className="pixel-btn pixel-btn--primary pixel-btn--wide"
-                onClick={createNextMove}
-                disabled={isThinking}
-              >
-                {isThinking ? "GO HUMAN IS THINKING..." : "FIND MY NEXT MOVE"}
-              </button>
-
-              {error && <p className="error-message">{error}</p>}
-            </section>
-
-            <section className="quick-actions">
-              <button
-                type="button"
-                className="pixel-btn quick-action"
-                onClick={() => choosePrompt("I need help focusing on my work.")}
-              >
-                🎯 Focus
-              </button>
-
-              <button
-                type="button"
-                className="pixel-btn quick-action"
-                onClick={() => choosePrompt("I feel alone and want to connect with someone.")}
-              >
-                🤝 Connect
-              </button>
-
-              <button
-                type="button"
-                className="pixel-btn quick-action"
-                onClick={() => choosePrompt("I feel tired and need to recharge.")}
-              >
-                🌿 Recharge
-              </button>
-            </section>
-
-            <AiResponse
-              nextMove={nextMove}
-              activeTheme={activeTheme}
-              activeAvatar={activeAvatar}
-              companionMood={companionMood}
-              onStartAction={startAction}
-            />
-          </>
+        {!hasOnboarded && (
+          <WelcomePage
+            activeAvatar={activeAvatar}
+            companionMood={companionMood}
+            onStart={handleWelcomeStart}
+          />
         )}
 
-        <ActionSession
-          activeAction={activeAction}
-          activeAvatar={activeAvatar}
-          sparkleUnlocked={sparkleUnlocked}
-          onToggle={toggleActionTimer}
-          onGiveUp={giveUpAction}
-          onExtend={extendActionTimer}
-          onOutcome={reportOutcome}
-          onMakeSmaller={makeActionSmaller}
-          onTryAgain={tryActionAgain}
-          onClose={closeActionSession}
-        />
+        {hasOnboarded && isJournalOpen && (
+          <Journal
+            entries={journalEntries}
+            customization={journalCustomization}
+            level={levelProgress.level}
+            activeAvatar={activeAvatar}
+            companionMood={companionMood}
+            onBack={closeJournal}
+            onAddEntry={addJournalEntry}
+            onUpdateEntry={updateJournalEntry}
+            onDeleteEntry={deleteJournalEntry}
+            onSetCustomization={setJournalCustomizationField}
+          />
+        )}
 
-        <Moments
-          moments={moments}
-          selectedMomentIndexes={selectedMomentIndexes}
-          onToggleMoment={toggleMomentSelected}
-          onRequestDelete={() => {
-            playSound("click");
-            setIsConfirmingDelete(true);
-          }}
-        />
+        {hasOnboarded && !isJournalOpen && (
+          <>
+          <XpHud xp={xp} levelProgress={levelProgress} justGainedXp={justGainedXp} />
+
+          <button type="button" className="pixel-frame journal-entry-card" onClick={openJournal}>
+            <span className="journal-entry-card-title">📖 YOUR JOURNAL</span>
+            <span className="journal-entry-card-body">Remember the things you do.</span>
+            <span className="journal-entry-card-count">
+              {journalEntries.length} {journalEntries.length === 1 ? "moment" : "moments"} saved
+            </span>
+            <span className="journal-entry-card-cta">OPEN JOURNAL →</span>
+          </button>
+
+          <RewardsPanel
+            isOpen={isRewardsOpen}
+            onClose={() => setIsRewardsOpen(false)}
+            unlockedRewardIds={unlockedRewardIds}
+            activeTheme={activeTheme}
+            activeAvatar={activeAvatar}
+            onSelectTheme={selectTheme}
+            onSelectAvatar={selectAvatar}
+          />
+
+          {!activeAction && (
+            <>
+              <section className="hero">
+                <div className="companion-stage companion-stage--hero">
+                  <Companion avatar={activeAvatar} mood={companionMood} size="lg" />
+                </div>
+
+                <p className="eyebrow">GO HUMAN</p>
+                <p className="tagline">An AI that helps you live outside the screen.</p>
+                <h1>What's going on?</h1>
+                <p className="subtitle">
+                  Tell GO HUMAN what's happening. It will help you choose your next small move.
+                </p>
+
+                <textarea
+                  className="pixel-input"
+                  value={message}
+                  onChange={(event) => {
+                    setMessage(event.target.value);
+                    setNextMove(null);
+                    setError("");
+                  }}
+                  placeholder="Tell me what's up..."
+                />
+
+                <button
+                  type="button"
+                  className="pixel-btn pixel-btn--primary pixel-btn--wide"
+                  onClick={createNextMove}
+                  disabled={isThinking}
+                >
+                  {isThinking ? "GO HUMAN IS THINKING..." : "FIND MY NEXT MOVE"}
+                </button>
+
+                {error && <p className="error-message">{error}</p>}
+              </section>
+
+              <section className="quick-actions">
+                <button
+                  type="button"
+                  className="pixel-btn quick-action"
+                  onClick={() => choosePrompt("I need help focusing on my work.")}
+                >
+                  🎯 Focus
+                </button>
+
+                <button
+                  type="button"
+                  className="pixel-btn quick-action"
+                  onClick={() => choosePrompt("I feel alone and want to connect with someone.")}
+                >
+                  🤝 Connect
+                </button>
+
+                <button
+                  type="button"
+                  className="pixel-btn quick-action"
+                  onClick={() => choosePrompt("I feel tired and need to recharge.")}
+                >
+                  🌿 Recharge
+                </button>
+              </section>
+
+              <AiResponse
+                nextMove={nextMove}
+                activeTheme={activeTheme}
+                activeAvatar={activeAvatar}
+                companionMood={companionMood}
+                onStartAction={startAction}
+              />
+            </>
+          )}
+
+            <ActionSession
+              activeAction={activeAction}
+              activeAvatar={activeAvatar}
+              sparkleUnlocked={sparkleUnlocked}
+              onToggle={toggleActionTimer}
+              onGiveUp={giveUpAction}
+              onExtend={extendActionTimer}
+              onOutcome={reportOutcome}
+              onMakeSmaller={makeActionSmaller}
+              onTryAgain={tryActionAgain}
+              onClose={closeActionSession}
+              onSaveToJournal={saveActiveActionToJournal}
+            />
+
+          <Moments
+            moments={moments}
+            selectedMomentIndexes={selectedMomentIndexes}
+            onToggleMoment={toggleMomentSelected}
+            onRequestDelete={() => {
+              playSound("click");
+              setIsConfirmingDelete(true);
+            }}
+          />
+          </>
+        )}
       </div>
+
+      {isInfoOpen && <InfoPanel onClose={closeInfoPanel} />}
 
       {isConfirmingDelete && (
         <ConfirmDeleteModal
