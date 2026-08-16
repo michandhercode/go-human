@@ -1,24 +1,16 @@
-.next-move {
-  margin-top: 24px;
-  padding: 20px;
-  border: 1px solid #818cf8;
-  border-radius: 18px;
-  background: rgba(99, 102, 241, 0.16);
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap");
+
+* {
+  box-sizing: border-box;
 }
 
-.next-move > p:nth-child(2) {
-  margin: 0 0 16px;
-  color: #f8fafc;
-  font-size: 1.1rem;
-  line-height: 1.5;
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
-.next-move button {
-  width: 100%;
-  padding: 13px;
-  border: 0;
-  border-radius: 14px;
-  color: #111827;
-  background: #c7d2fe;
-  font-weight: 700;
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-x: hidden;
 }

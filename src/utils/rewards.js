@@ -1,4 +1,11 @@
- export const CHATBOX_THEMES = [
+export const DEFAULT_COMPANION = {
+  id: "default",
+  body: "#f8fafc",
+  cheeks: "#fda4af",
+  accessory: null,
+};
+
+export const CHATBOX_THEMES = [
   {
     id: "nature",
     unlockLevel: 2,
@@ -46,10 +53,42 @@
 ];
 
 export const AVATARS = [
-  { id: "sunrise", unlockLevel: 3, emoji: "🌅", name: "Sunrise Mode" },
-  { id: "butterfly", unlockLevel: 5, emoji: "🦋", name: "Butterfly" },
-  { id: "cat", unlockLevel: 7, emoji: "🐈", name: "Companion" },
-  { id: "star", unlockLevel: 9, emoji: "🌠", name: "Shooting Star" },
+  {
+    id: "sunrise",
+    unlockLevel: 3,
+    emoji: "🌅",
+    name: "Sunrise Mode",
+    body: "#fef3c7",
+    cheeks: "#fb7185",
+    accessory: "sun",
+  },
+  {
+    id: "butterfly",
+    unlockLevel: 5,
+    emoji: "🦋",
+    name: "Butterfly",
+    body: "#ede9fe",
+    cheeks: "#f9a8d4",
+    accessory: "wings",
+  },
+  {
+    id: "cat",
+    unlockLevel: 7,
+    emoji: "🐈",
+    name: "Companion",
+    body: "#fed7aa",
+    cheeks: "#fb7185",
+    accessory: "ears",
+  },
+  {
+    id: "star",
+    unlockLevel: 9,
+    emoji: "🌠",
+    name: "Shooting Star",
+    body: "#fef9c3",
+    cheeks: "#facc15",
+    accessory: "star",
+  },
 ];
 
 export const EFFECTS = [
