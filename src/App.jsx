@@ -20,6 +20,9 @@ import TopControls from "./components/TopControls";
 import Journal from "./components/Journal";
 import LifeStats from "./components/LifeStats";
 import LifeStatsPanel from "./components/LifeStatsPanel";
+import DashboardCard from "./components/DashboardCard";
+import PixelIcon from "./components/PixelIcon";
+import { BOOK_PIXELS, BOOK_PALETTE } from "./utils/pixelArt";
 import {
   DEFAULT_JOURNAL_CUSTOMIZATION,
   loadJournalState,
@@ -842,15 +845,6 @@ function App() {
           <>
           <XpHud xp={xp} levelProgress={levelProgress} justGainedXp={justGainedXp} />
 
-          <button type="button" className="pixel-frame journal-entry-card" onClick={openJournal}>
-            <span className="journal-entry-card-title">📖 YOUR JOURNAL</span>
-            <span className="journal-entry-card-body">Remember the things you do.</span>
-            <span className="journal-entry-card-count">
-              {journalEntries.length} {journalEntries.length === 1 ? "moment" : "moments"} saved
-            </span>
-            <span className="journal-entry-card-cta">OPEN JOURNAL →</span>
-          </button>
-
           <RewardsPanel
             isOpen={isRewardsOpen}
             onClose={() => setIsRewardsOpen(false)}
@@ -948,12 +942,19 @@ function App() {
               onSaveToJournal={saveActiveActionToJournal}
             />
 
-          <LifeStats
-            stats={lifeStats}
-            mostCommonAdventure={mostCommonAdventure}
-            observation={lifeObservation}
-            onOpenLifeStats={openLifeStats}
-          />
+          <div className="dashboard-cards">
+            <DashboardCard
+              icon={<PixelIcon pixels={BOOK_PIXELS} palette={BOOK_PALETTE} />}
+              title="YOUR JOURNAL"
+              subtitle="Keep the moments that matter."
+              actionLabel="OPEN JOURNAL →"
+              ariaLabel="Open Your Journal"
+              onClick={openJournal}
+              accent="journal"
+            />
+
+            <LifeStats onOpenLifeStats={openLifeStats} />
+          </div>
 
           <Moments moments={moments} onOpenMomentHistory={openMomentHistory} />
           </>

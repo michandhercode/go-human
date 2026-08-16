@@ -2111,26 +2111,24 @@ h1 {
   .top-controls {
     flex-wrap: wrap;
   }
+
+  /* Stack the Journal / Life Stats cards on narrow phones instead of
+     squeezing them (and their pixel-art) side by side. */
+  .dashboard-cards {
+    flex-direction: column;
+  }
+
+  .dashboard-card {
+    --pixel-size: 4px;
+    aspect-ratio: auto;
+    padding: 24px 16px;
+  }
 }
 
 /* ============================= LIFE STATS ============================= */
 /* Uses --panel/--panel-border/--cream/--muted (fixed, non-theme, non-day-
    night tokens — see the note at the top of :root) so this card is
    readable in both Day and Night without any extra overrides. */
-.life-stats {
-  margin-bottom: 18px;
-}
-
-.life-stats-eyebrow {
-  text-align: center;
-}
-
-.life-stats-card {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
 .life-stats-list {
   list-style: none;
   margin: 0;
@@ -2160,12 +2158,6 @@ h1 {
   font-family: var(--font-pixel);
   font-size: 0.7rem;
   color: var(--accent);
-}
-
-.life-stats-divider {
-  height: 2px;
-  background: var(--panel-border);
-  opacity: 0.5;
 }
 
 .life-stats-adventure,
@@ -2203,10 +2195,6 @@ h1 {
   line-height: 1.5;
 }
 
-.life-stats-cta {
-  margin-top: 2px;
-}
-
 /* Dedicated Life Stats panel — same modal-backdrop pattern as InfoPanel. */
 .life-stats-modal {
   max-width: 360px;
@@ -2236,40 +2224,138 @@ h1 {
   font-size: 0.8rem;
 }
 
-/* ============================= JOURNAL ENTRY POINT (main page) ============================= */
-.journal-entry-card {
+/* ============================= DASHBOARD DESTINATION CARDS ============================= */
+/* Journal + Life Stats, side by side on the main dashboard. Two compact,
+   square-ish "destination" cards — see DashboardCard.jsx / LifeStats.jsx.
+   Built on the same .pixel-frame panel every other card uses (so it's
+   already Day/Night-safe: --panel/--panel-border/--cream never change with
+   theme), with just a thin --card-accent stripe per card for the "subtle
+   color difference" between Journal (warm) and Life Stats (cool). */
+.dashboard-cards {
+  display: flex;
+  gap: 20px;
+  margin: 28px 0;
+}
+
+.dashboard-card {
+  --card-accent: var(--accent);
+  --card-tint: 0%;
+  --pixel-size: 5px;
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  width: 100%;
-  margin-bottom: 18px;
-  padding: 16px 18px;
-  text-align: left;
-  background: var(--panel-raised);
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  aspect-ratio: 1 / 1.08;
+  padding: 22px 14px;
+  text-align: center;
+  /* Base panel color, blended toward --card-accent by --card-tint — 0% at
+     rest, a little more on hover, a little more again on press. Falls
+     back to the plain panel color in browsers without color-mix(). */
+  background: var(--panel);
+  background: color-mix(in srgb, var(--card-accent) var(--card-tint), var(--panel));
   cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.12s ease;
 }
 
-.journal-entry-card:hover {
-  transform: translateY(-2px);
+.dashboard-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: var(--notch);
+  right: var(--notch);
+  height: 3px;
+  background: var(--card-accent);
+  opacity: 0.85;
 }
 
-.journal-entry-card-title {
+.dashboard-card--journal {
+  --card-accent: var(--gold);
+}
+
+.dashboard-card--stats {
+  --card-accent: var(--success);
+}
+
+.dashboard-card:hover {
+  --card-tint: 12%;
+  transform: translateY(-3px);
+  box-shadow: 6px 6px 0 0 var(--panel-border);
+}
+
+.dashboard-card:active {
+  --card-tint: 22%;
+  transform: translateY(2px);
+  box-shadow: 1px 1px 0 0 var(--panel-border);
+}
+
+.dashboard-card:focus-visible {
+  outline: 2px dashed var(--card-accent);
+  outline-offset: 3px;
+}
+
+.dashboard-card-title {
   font-family: var(--font-pixel);
-  font-size: 0.68rem;
-  color: var(--cream);
+  font-size: 0.66rem;
   letter-spacing: 0.03em;
+  color: var(--cream);
+  transition: color 0.12s ease;
 }
 
-.journal-entry-card-body {
-  color: var(--muted);
-  font-size: 0.85rem;
+.dashboard-card:hover .dashboard-card-title,
+.dashboard-card:active .dashboard-card-title {
+  color: var(--card-accent);
 }
 
-.journal-entry-card-count {
+.dashboard-card-subtitle {
+  margin-top: -8px;
   color: var(--muted);
   font-size: 0.72rem;
-  opacity: 0.85;
+  line-height: 1.4;
+}
+
+.dashboard-card-action {
+  margin-top: 2px;
+  font-family: var(--font-pixel);
+  font-size: 0.56rem;
+  letter-spacing: 0.02em;
+  color: var(--card-accent);
+  transition: filter 0.12s ease;
+}
+
+.dashboard-card:hover .dashboard-card-action {
+  filter: brightness(1.12);
+}
+
+.dashboard-card:active .dashboard-card-action {
+  filter: brightness(1.22);
+}
+
+/* The illustration itself — see PixelIcon.jsx. A single element, its
+   pixels painted with one layered box-shadow so it stays crisp at any
+   --pixel-size. */
+.pixel-icon {
+  position: relative;
+  display: block;
+  transition: filter 0.12s ease;
+}
+
+.pixel-icon-pixel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+}
+
+.dashboard-card:hover .pixel-icon {
+  filter: brightness(1.12);
+}
+
+.dashboard-card:active .pixel-icon {
+  filter: brightness(1.22);
 }
 
 .journal-entry-card-cta {
