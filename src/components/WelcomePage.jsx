@@ -9,6 +9,21 @@ import Companion from "./Companion";
 function WelcomePage({ activeAvatar, companionMood, onStart }) {
   return (
     <section className="welcome">
+      {/* This is the very first screen the app can ever show — there's no
+          previous in-app screen for this button to return to, and it must
+          never touch go-human-onboarded or any other saved state. Browser
+          back is the safest existing navigation behavior available (a no-op
+          if there's nowhere to go), so we use that instead of inventing a
+          router just for this one button. */}
+      <button
+        type="button"
+        className="pixel-btn welcome-back-btn"
+        onClick={() => window.history.back()}
+        aria-label="Back"
+      >
+        ←
+      </button>
+
       <div className="companion-stage companion-stage--hero welcome-avatar">
         <Companion avatar={activeAvatar} mood={companionMood} size="xl" />
       </div>

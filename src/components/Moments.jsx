@@ -1,7 +1,14 @@
-import { ACTION_XP } from "../utils/xp";
-import { formatDateTime } from "../utils/time";
+import MomentCard from "./MomentCard";
 
-function Moments({ moments, selectedMomentIndexes, onToggleMoment, onRequestDelete }) {
+const PREVIEW_COUNT = 3;
+
+// Dashboard preview only — shows the most recent moments (moments[0] is
+// newest, since App.jsx prepends new ones) and hands off to the full Moment
+// History view for anything more, including delete. Nothing here is
+// clickable/selectable; that was the old, unintentional-delete behavior.
+function Moments({ moments, onOpenMomentHistory }) {
+  const previewMoments = moments.slice(0, PREVIEW_COUNT);
+
   return (
     <section className="moments">
       <div className="moments-heading">
@@ -17,57 +24,18 @@ function Moments({ moments, selectedMomentIndexes, onToggleMoment, onRequestDele
       ) : (
         <>
           <div className="moments-list">
-            {moments.map((moment, index) => {
-              const isSelected = selectedMomentIndexes.includes(index);
-              const formattedDate = formatDateTime(moment.completedAt);
-
-              return (
-                <article
-                  className={`pixel-frame moment-card${isSelected ? " moment-card--selected" : ""}`}
-                  key={index}
-                  onClick={() => onToggleMoment(index)}
-                >
-                  <span className="moment-checkbox">{isSelected ? "☑" : "☐"}</span>
-
-                  <div className="moment-content">
-                    <div className="moment-top-row">
-                      {moment.category && (
-                        <span className="moment-badge moment-badge--category">{moment.category}</span>
-                      )}
-                      {moment.duration && <span className="moment-badge">{moment.duration} MIN</span>}
-                      <span className="moment-badge moment-badge--xp">
-                        +{moment.xpEarned ?? ACTION_XP} XP
-                      </span>
-                      {moment.outcome && (
-                        <span
-                          className={`moment-badge moment-badge--outcome moment-badge--outcome-${
-                            moment.outcome === "Progress" ? "progress" : "completed"
-                          }`}
-                        >
-                          {moment.outcome === "Progress" ? "🌱 PROGRESS" : "✨ COMPLETED"}
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="moment-title">{moment.title ?? moment.action}</p>
-
-                    {moment.description && <p className="moment-description">{moment.description}</p>}
-
-                    {formattedDate && <p className="moment-date">{formattedDate}</p>}
-                  </div>
-                </article>
-              );
-            })}
+            {previewMoments.map((moment, index) => (
+              <MomentCard key={moment.completedAt ?? index} moment={moment} />
+            ))}
           </div>
 
-          {selectedMomentIndexes.length > 0 && (
-            <div className="pixel-frame moments-delete-bar">
-              <span>{selectedMomentIndexes.length} SELECTED</span>
-              <button type="button" className="pixel-btn pixel-btn--danger" onClick={onRequestDelete}>
-                🗑 DELETE {selectedMomentIndexes.length}
-              </button>
-            </div>
-          )}
+          <button
+            type="button"
+            className="pixel-btn pixel-btn--muted pixel-btn--wide moments-view-all-cta"
+            onClick={onOpenMomentHistory}
+          >
+            VIEW ALL MOMENTS →
+          </button>
         </>
       )}
     </section>

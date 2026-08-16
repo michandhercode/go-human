@@ -120,7 +120,7 @@ function TopControls({
         onClick={onOpenInfo}
         aria-label="What is GO HUMAN?"
       >
-        ⓘ
+        ⓘ ABOUT
       </button>
     </div>
   );

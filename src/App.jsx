@@ -10,6 +10,7 @@ import RewardsPanel from "./components/RewardsPanel";
 import AiResponse from "./components/AiResponse";
 import ActionSession from "./components/ActionSession";
 import Moments from "./components/Moments";
+import MomentHistory from "./components/MomentHistory";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModal";
 import LevelUpOverlay from "./components/LevelUpOverlay";
 import RewardUnlockToast from "./components/RewardUnlockToast";
@@ -17,6 +18,8 @@ import WelcomePage from "./components/WelcomePage";
 import InfoPanel from "./components/InfoPanel";
 import TopControls from "./components/TopControls";
 import Journal from "./components/Journal";
+import LifeStats from "./components/LifeStats";
+import LifeStatsPanel from "./components/LifeStatsPanel";
 import {
   DEFAULT_JOURNAL_CUSTOMIZATION,
   loadJournalState,
@@ -25,6 +28,12 @@ import {
   getEntryIcon,
   makeJournalId,
 } from "./utils/journal";
+import {
+  getLifeStats,
+  getMostCommonAdventure,
+  getLifeObservation,
+  getCategoryBreakdown,
+} from "./utils/lifeStats";
 import {
   initAudio,
   isSoundEnabled,
@@ -81,8 +90,12 @@ function App() {
     () => localStorage.getItem("go-human-avatar") || null
   );
 
-  const [selectedMomentIndexes, setSelectedMomentIndexes] = useState([]);
-  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  // --- Moment History (full view) + delete. Both operate on the same
+  // `moments` array/state above — no duplicate storage. pendingDeleteMomentIndex
+  // is the index (within the FULL moments array) awaiting confirmation, or
+  // null when no delete is in progress.
+  const [isMomentHistoryOpen, setIsMomentHistoryOpen] = useState(false);
+  const [pendingDeleteMomentIndex, setPendingDeleteMomentIndex] = useState(null);
 
   // --- Virtual Life Journal — entirely additive, own storage key, never
   // touches XP/rewards/onboarding/moments state above.
@@ -96,6 +109,10 @@ function App() {
   // existing Journal/JournalEntry/JournalEditor/JournalCustomize components.
   const [journalState, setJournalState] = useState(() => loadJournalState());
   const [isJournalOpen, setIsJournalOpen] = useState(false);
+
+  // --- Life Stats — purely derived from moments + journalState above, no
+  // storage of its own. isLifeStatsOpen just toggles the dedicated panel.
+  const [isLifeStatsOpen, setIsLifeStatsOpen] = useState(false);
 
   // --- day/night environment (NOT a reward — the base world's lighting).
   // Day is always the default on a fresh install; only a previously saved
@@ -597,6 +614,16 @@ function App() {
     setIsJournalOpen(false);
   }
 
+  function openLifeStats() {
+    playSound("click");
+    setIsLifeStatsOpen(true);
+  }
+
+  function closeLifeStats() {
+    playSound("click");
+    setIsLifeStatsOpen(false);
+  }
+
   // Routes a new entry through the album-aware data layer: it lands in the
   // primary album if there's room, otherwise the capacity/overflow logic in
   // addEntryToAlbum() finds (or creates) the next album for it. Until
@@ -667,22 +694,34 @@ function App() {
     setActiveAction((current) => (current ? { ...current, journalSaved: true } : current));
   }
 
-  function toggleMomentSelected(index) {
-    playSound("click");
-    setSelectedMomentIndexes((current) =>
-      current.includes(index)
-        ? current.filter((selectedIndex) => selectedIndex !== index)
-        : [...current, index]
-    );
+  function openMomentHistory() {
+    playSound("drawer");
+    setIsMomentHistoryOpen(true);
   }
 
-  function deleteSelectedMoments() {
+  function closeMomentHistory() {
+    playSound("click");
+    setIsMomentHistoryOpen(false);
+  }
+
+  // Opening a delete confirmation is the only thing tapping/clicking near a
+  // moment can do now — never an implicit select.
+  function requestDeleteMoment(index) {
+    playSound("click");
+    setPendingDeleteMomentIndex(index);
+  }
+
+  function cancelDeleteMoment() {
+    playSound("click");
+    setPendingDeleteMomentIndex(null);
+  }
+
+  function confirmDeleteMoment() {
     playSound("click");
     setMoments((currentMoments) =>
-      currentMoments.filter((_, index) => !selectedMomentIndexes.includes(index))
+      currentMoments.filter((_, index) => index !== pendingDeleteMomentIndex)
     );
-    setSelectedMomentIndexes([]);
-    setIsConfirmingDelete(false);
+    setPendingDeleteMomentIndex(null);
   }
 
   function equipQueuedReward(reward) {
@@ -732,6 +771,13 @@ function App() {
   // UI, which doesn't know about albums yet.
   const journalEntries = journalState.entries;
   const journalCustomization = journalState.albums[0]?.customization ?? DEFAULT_JOURNAL_CUSTOMIZATION;
+
+  // Life Stats — derived fresh from moments + journalState on every render.
+  // No storage, no API calls; see utils/lifeStats.js.
+  const lifeStats = getLifeStats(moments, journalState);
+  const mostCommonAdventure = getMostCommonAdventure(moments);
+  const lifeObservation = getLifeObservation(lifeStats, mostCommonAdventure, moments);
+  const lifeStatsCategoryBreakdown = getCategoryBreakdown(moments);
 
   return (
     <main
@@ -784,7 +830,15 @@ function App() {
           />
         )}
 
-        {hasOnboarded && !isJournalOpen && (
+        {hasOnboarded && !isJournalOpen && isMomentHistoryOpen && (
+          <MomentHistory
+            moments={moments}
+            onBack={closeMomentHistory}
+            onRequestDelete={requestDeleteMoment}
+          />
+        )}
+
+        {hasOnboarded && !isJournalOpen && !isMomentHistoryOpen && (
           <>
           <XpHud xp={xp} levelProgress={levelProgress} justGainedXp={justGainedXp} />
 
@@ -894,29 +948,35 @@ function App() {
               onSaveToJournal={saveActiveActionToJournal}
             />
 
-          <Moments
-            moments={moments}
-            selectedMomentIndexes={selectedMomentIndexes}
-            onToggleMoment={toggleMomentSelected}
-            onRequestDelete={() => {
-              playSound("click");
-              setIsConfirmingDelete(true);
-            }}
+          <LifeStats
+            stats={lifeStats}
+            mostCommonAdventure={mostCommonAdventure}
+            observation={lifeObservation}
+            onOpenLifeStats={openLifeStats}
           />
+
+          <Moments moments={moments} onOpenMomentHistory={openMomentHistory} />
           </>
         )}
       </div>
 
       {isInfoOpen && <InfoPanel onClose={closeInfoPanel} />}
 
-      {isConfirmingDelete && (
+      {isLifeStatsOpen && (
+        <LifeStatsPanel
+          stats={lifeStats}
+          mostCommonAdventure={mostCommonAdventure}
+          observation={lifeObservation}
+          categoryBreakdown={lifeStatsCategoryBreakdown}
+          onClose={closeLifeStats}
+        />
+      )}
+
+      {pendingDeleteMomentIndex !== null && (
         <ConfirmDeleteModal
-          count={selectedMomentIndexes.length}
-          onCancel={() => {
-            playSound("click");
-            setIsConfirmingDelete(false);
-          }}
-          onConfirm={deleteSelectedMoments}
+          count={1}
+          onCancel={cancelDeleteMoment}
+          onConfirm={confirmDeleteMoment}
         />
       )}
 
