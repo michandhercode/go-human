@@ -2172,13 +2172,13 @@ h1 {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 8px;
+  gap: 12px;
 }
 
 .life-stats-list li {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .life-stats-icon {
@@ -2193,6 +2193,8 @@ h1 {
 }
 
 .life-stats-value {
+  min-width: 32px;
+  text-align: right;
   font-family: var(--font-pixel);
   font-size: 0.7rem;
   color: var(--accent);
@@ -2205,7 +2207,7 @@ h1 {
 
 .life-stats-adventure-label,
 .life-stats-empty-title {
-  margin: 0 0 6px;
+  margin: 0 0 10px;
   color: var(--cream);
   font-family: var(--font-pixel);
   font-size: 0.6rem;
@@ -2213,7 +2215,7 @@ h1 {
 }
 
 .life-stats-adventure-value {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   font-family: var(--font-pixel);
   font-size: 0.78rem;
   color: var(--cream);
@@ -2236,13 +2238,19 @@ h1 {
 /* Dedicated Life Stats panel — same modal-backdrop pattern as InfoPanel. */
 .life-stats-modal {
   max-width: 360px;
+  padding: 22px 20px;
+}
+
+.life-stats-back-btn {
+  margin-bottom: 14px;
+  font-size: 0.55rem;
 }
 
 .life-stats-modal-body {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  margin-bottom: 20px;
+  gap: 22px;
+  margin-bottom: 24px;
   text-align: left;
 }
 
@@ -2251,15 +2259,22 @@ h1 {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 6px;
+  gap: 9px;
 }
 
 .life-stats-breakdown-list li {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   color: var(--muted);
   font-size: 0.8rem;
+}
+
+.life-stats-breakdown-list li span:last-child {
+  min-width: 28px;
+  text-align: right;
+  flex-shrink: 0;
 }
 
 /* ============================= DASHBOARD DESTINATION CARDS ============================= */
@@ -2441,7 +2456,15 @@ h1 {
   font-size: 0.88rem;
 }
 
-.journal-customize-btn {
+.journal-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.journal-customize-btn,
+.journal-flipbook-btn {
   font-size: 0.55rem;
 }
 
@@ -2490,10 +2513,6 @@ h1 {
   color: var(--muted);
   line-height: 1.6;
   font-size: 0.88rem;
-}
-
-.journal-empty-cta {
-  margin-top: 4px;
 }
 
 /* ============================= JOURNAL GRID / CARDS ============================= */
@@ -2645,13 +2664,14 @@ h1 {
   max-height: 86vh;
   overflow-y: auto;
   text-align: left;
+  padding: 22px 20px;
   -webkit-overflow-scrolling: touch;
 }
 
 .journal-editor-form {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .journal-editor-quest-info {
@@ -2662,15 +2682,28 @@ h1 {
 }
 
 .journal-field-label {
-  margin-top: 8px;
+  margin-top: 6px;
+  margin-bottom: 2px;
   color: var(--accent);
   font-family: var(--font-pixel);
-  font-size: 0.52rem;
+  font-size: 0.56rem;
   letter-spacing: 0.05em;
 }
 
 .journal-editor-textarea {
   min-height: 70px;
+}
+
+/* Journal editor inputs sit on a raised surface so they read as distinct
+   fields instead of blending into the modal's own --panel background. */
+.journal-editor .pixel-input {
+  background: var(--panel-raised);
+  color: var(--cream);
+}
+
+.journal-editor .pixel-input::placeholder {
+  color: var(--muted);
+  opacity: 1;
 }
 
 input.pixel-input {
@@ -2681,16 +2714,35 @@ input.pixel-input {
 .journal-mood-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
+  margin-bottom: 2px;
 }
 
+/* Mood/category chips are plain <button>s with no pixel-btn class, so
+   without explicit colors here they fall back to the browser's default
+   button chrome (near-white bg) with the inherited cream text on top —
+   i.e. unreadable white-on-white. Give them the same pixel look as the
+   rest of the UI. */
 .journal-chip {
-  padding: 6px 10px;
+  padding: 8px 12px;
+  font-family: var(--font-pixel);
   font-size: 0.58rem;
+  line-height: 1.4;
+  color: var(--cream);
+  background: var(--panel-raised);
+  border: 2px solid var(--panel-border);
+  box-shadow: 0 3px 0 0 var(--panel-border);
+  cursor: pointer;
+  transition: transform 0.08s ease;
+}
+
+.journal-chip:hover {
+  transform: translateY(-1px);
 }
 
 .journal-chip--active {
   background: var(--accent);
+  border-color: var(--accent);
   color: var(--ink);
 }
 
@@ -2752,6 +2804,163 @@ input.pixel-input {
   width: 100%;
 }
 
+/* ============================= JOURNAL FLIPBOOK ============================= */
+.journal-flipbook-drawer {
+  max-width: 440px;
+}
+
+.flipbook-empty {
+  padding: 30px 10px;
+  text-align: center;
+}
+
+.flipbook-empty-text {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.flipbook-stage {
+  position: relative;
+  min-height: 380px;
+  margin: 4px 0 18px;
+  perspective: 1400px;
+}
+
+/* Faux spine shadow along the left edge for a bit of book-like depth. */
+.flipbook-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 14px;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.18), transparent);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.flipbook-page {
+  position: absolute;
+  inset: 0;
+  background: var(--cream);
+  border: 3px solid var(--panel-border);
+  box-shadow: 4px 4px 0 0 var(--panel-border);
+}
+
+.flipbook-page--base {
+  padding: 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.flipbook-page--flip {
+  transform-style: preserve-3d;
+  transform-origin: left center;
+  transform: rotateY(0deg);
+  transition: transform 0.6s ease-in-out;
+  will-change: transform;
+  z-index: 3;
+}
+
+.flipbook-page--flip-active.flipbook-page--flip-next {
+  transform: rotateY(-180deg);
+}
+
+.flipbook-page--flip-active.flipbook-page--flip-prev {
+  transform: rotateY(180deg);
+}
+
+.flipbook-page-face {
+  position: absolute;
+  inset: 0;
+  padding: 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--cream);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flipbook-page-face--back {
+  transform: rotateY(180deg);
+}
+
+.flipbook-page-content {
+  position: relative;
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--ink);
+  text-align: left;
+}
+
+.flipbook-page-date {
+  margin: 0;
+  color: #8a7a4f;
+  font-family: var(--font-pixel);
+  font-size: 0.55rem;
+  letter-spacing: 0.05em;
+}
+
+.flipbook-page-photo {
+  margin: 0;
+}
+
+.flipbook-page-note {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.flipbook-page-note--empty {
+  color: #8a7a4f;
+  font-style: italic;
+}
+
+.flipbook-page-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.flipbook-page-sticker {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-size: 1.5rem;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.25));
+}
+
+.flipbook-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.flipbook-nav-btn {
+  flex: 1;
+  font-size: 0.56rem;
+  padding: 12px 8px;
+}
+
+.flipbook-position {
+  margin: 0;
+  min-width: 56px;
+  color: var(--cream);
+  font-family: var(--font-pixel);
+  font-size: 0.6rem;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .flipbook-stage {
+    min-height: 340px;
+  }
+}
+
 /* ============================= JOURNAL CUSTOMIZE DRAWER ============================= */
 .journal-customize-drawer {
   padding-bottom: 28px;
@@ -2798,6 +3007,22 @@ input.pixel-input {
 }
 
 /* ============================= JOURNAL RESPONSIVE ============================= */
+@media (max-width: 480px) {
+  .journal-editor {
+    max-height: 92vh;
+    padding: 16px 14px;
+  }
+
+  .journal-editor-form {
+    gap: 10px;
+  }
+
+  .journal-sticker-option {
+    width: 38px;
+    height: 38px;
+  }
+}
+
 @media (max-width: 380px) {
   .journal-grid {
     grid-template-columns: 1fr;

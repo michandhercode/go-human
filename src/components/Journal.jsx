@@ -3,6 +3,7 @@ import Companion from "./Companion";
 import JournalEntry from "./JournalEntry";
 import JournalEditor from "./JournalEditor";
 import JournalCustomize from "./JournalCustomize";
+import JournalFlipbook from "./JournalFlipbook";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 import { now } from "../utils/time";
 import { JOURNAL_COVERS, JOURNAL_STICKER_PACKS, getEntryIcon, makeJournalId } from "../utils/journal";
@@ -22,6 +23,7 @@ function Journal({
   const [editingEntry, setEditingEntry] = useState(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
+  const [isFlipbookOpen, setIsFlipbookOpen] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   const cover = JOURNAL_COVERS.find((item) => item.id === customization.cover) ?? JOURNAL_COVERS[0];
@@ -100,9 +102,18 @@ function Journal({
         </p>
         <p className="journal-tagline">Your little collection of real-life wins.</p>
 
-        <button type="button" className="pixel-btn journal-customize-btn" onClick={() => setIsCustomizeOpen(true)}>
-          🎨 CUSTOMIZE
+        <button type="button" className="pixel-btn pixel-btn--primary journal-primary-cta" onClick={openNewEntry}>
+          + ADD MOMENT
         </button>
+
+        <div className="journal-header-actions">
+          <button type="button" className="pixel-btn journal-customize-btn" onClick={() => setIsCustomizeOpen(true)}>
+            🎨 CUSTOMIZE
+          </button>
+          <button type="button" className="pixel-btn journal-flipbook-btn" onClick={() => setIsFlipbookOpen(true)}>
+            📖 FLIPBOOK
+          </button>
+        </div>
       </header>
 
       {entries.length === 0 ? (
@@ -116,9 +127,6 @@ function Journal({
             <br />
             We'll save it here.
           </p>
-          <button type="button" className="pixel-btn pixel-btn--primary journal-empty-cta" onClick={openNewEntry}>
-            + ADD MOMENT
-          </button>
         </div>
       ) : (
         <div className="journal-grid">
@@ -131,12 +139,6 @@ function Journal({
             />
           ))}
         </div>
-      )}
-
-      {entries.length > 0 && (
-        <button type="button" className="pixel-btn pixel-btn--primary journal-add-fab" onClick={openNewEntry}>
-          + ADD MOMENT
-        </button>
       )}
 
       {isEditorOpen && (
@@ -156,6 +158,14 @@ function Journal({
           customization={customization}
           level={level}
           onSelect={onSetCustomization}
+        />
+      )}
+
+      {isFlipbookOpen && (
+        <JournalFlipbook
+          entries={entries}
+          frameId={customization.frame}
+          onClose={() => setIsFlipbookOpen(false)}
         />
       )}
 

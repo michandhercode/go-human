@@ -5,6 +5,10 @@ function LifeStatsPanel({ stats, mostCommonAdventure, observation, categoryBreak
         className="pixel-frame modal life-stats-modal"
         onClick={(event) => event.stopPropagation()}
       >
+        <button type="button" className="pixel-btn pixel-btn--muted life-stats-back-btn" onClick={onClose}>
+          ← DASHBOARD
+        </button>
+
         <p className="modal-title">✦ YOUR LIFE LATELY ✦</p>
 
         <div className="life-stats-modal-body">
