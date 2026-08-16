@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { DEFAULT_COMPANION } from "../utils/rewards";
-import { playPetSound } from "../utils/sound";
+import { playPetSound } from "../utils/sounds";
 
 const PET_ANIMATION_MS = 650;
 

@@ -707,6 +707,149 @@ button {
   background: var(--panel);
 }
 
+/* ============================= SOUND POPOVER ============================= */
+.sound-popover-wrapper {
+  position: relative;
+}
+
+.sound-popover {
+  --pf-notch: var(--notch-sm);
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  width: 200px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* Panel colors are fixed (not theme/day-night dependent) so this stays
+     readable no matter what the world looks like behind it. */
+  background: var(--panel-raised);
+}
+
+.sound-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.sound-row-label {
+  font-family: var(--font-pixel);
+  font-size: 0.46rem;
+  letter-spacing: 0.02em;
+  color: var(--cream);
+  white-space: nowrap;
+}
+
+.sound-volume-value {
+  font-family: var(--font-pixel);
+  font-size: 0.42rem;
+  color: var(--muted);
+  min-width: 26px;
+  text-align: right;
+}
+
+/* Pixel-styled horizontal range slider. The filled portion is driven by the
+   --sound-fill custom property (set inline from React on every drag) so it
+   tracks the accent color of whatever world theme is currently equipped. */
+.sound-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 14px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.sound-slider:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.sound-slider::-webkit-slider-runnable-track {
+  height: 8px;
+  background: linear-gradient(
+    to right,
+    var(--accent) 0%,
+    var(--accent) var(--sound-fill, 50%),
+    var(--panel) var(--sound-fill, 50%),
+    var(--panel) 100%
+  );
+  border: 2px solid var(--panel-border);
+}
+
+.sound-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 16px;
+  margin-top: -6px;
+  background: var(--cream);
+  border: 2px solid var(--panel-border);
+  box-shadow: 2px 2px 0 0 var(--panel-border);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.sound-slider:disabled::-webkit-slider-thumb {
+  background: var(--muted);
+  cursor: not-allowed;
+}
+
+.sound-slider::-moz-range-track {
+  height: 8px;
+  background: var(--panel);
+  border: 2px solid var(--panel-border);
+}
+
+.sound-slider::-moz-range-progress {
+  height: 8px;
+  background: var(--accent);
+  border: 2px solid var(--panel-border);
+}
+
+.sound-slider::-moz-range-thumb {
+  width: 10px;
+  height: 16px;
+  background: var(--cream);
+  border: 2px solid var(--panel-border);
+  box-shadow: 2px 2px 0 0 var(--panel-border);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.sound-slider:disabled::-moz-range-thumb {
+  background: var(--muted);
+  cursor: not-allowed;
+}
+
+.sound-mute-btn {
+  font-family: var(--font-pixel);
+  font-size: 0.5rem;
+  color: var(--cream);
+  background: var(--panel);
+  border: 2px solid var(--panel-border);
+  box-shadow: 0 2px 0 0 var(--panel-border);
+  padding: 4px 6px;
+  min-width: 26px;
+  transform: translateY(0);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.sound-mute-btn:hover {
+  transform: translateY(-1px);
+}
+
+.sound-mute-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 0 var(--panel-border);
+}
+
+.sound-mute-btn--off {
+  color: var(--muted);
+}
+
 /* ============================= REWARD CLOSET (drawer) ============================= */
 .rewards-drawer-backdrop {
   position: fixed;
