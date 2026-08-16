@@ -657,11 +657,22 @@ button {
 /* ============================= TOP CONTROLS ============================= */
 .top-controls {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 10px;
   margin-bottom: 14px;
+}
+
+/* Day/Night, Rewards, and Sound live here so they can wrap onto a second
+   line on narrow screens without ever pulling ABOUT out of place. */
+.top-controls-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .icon-toggle-btn {
@@ -712,6 +723,7 @@ button {
   padding: 9px 13px;
   min-width: 74px;
   text-align: center;
+  flex-shrink: 0;
 }
 
 /* ============================= SOUND POPOVER ============================= */
@@ -2146,10 +2158,6 @@ h1 {
     grid-template-columns: 1fr;
   }
 
-  .top-controls {
-    flex-wrap: wrap;
-  }
-
   /* Stack the Journal / Life Stats cards on narrow phones instead of
      squeezing them (and their pixel-art) side by side. */
   .dashboard-cards {
@@ -2275,7 +2283,7 @@ h1 {
   min-width: 28px;
   text-align: right;
   flex-shrink: 0;
-}
+} 
 
 /* ============================= DASHBOARD DESTINATION CARDS ============================= */
 /* Journal + Life Stats, side by side on the main dashboard. Two compact,

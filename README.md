@@ -1,48 +1,197 @@
 # GO HUMAN
 
-GO HUMAN is a small web app I built to help you figure out what to do next when you're feeling stuck, burnt out, or just endlessly scrolling.
+### What if an AI's goal wasn't to keep you on your phone?
 
-The whole point is simple: instead of designing another app that keeps you glued to your screen, this one tries to get you to put your phone down and do something in the real world.
+GO HUMAN is a small web app I built because I noticed something pretty stupid about my own habits:
 
-## What it actually does
+Whenever I'm stressed about school, don't know where to start, or just feel tired, I end up scrolling.
 
-*   **AI Next Move:** Just type in how you're feeling or what's going on, and it gives you one simple thing to do next.
-*   **Focus:** Helps you actually start studying or working when your brain refuses to cooperate.
-*   **Connect:** Quick ideas to reach out to people so you don't isolate yourself.
-*   **Recharge:** Suggests a quick screen-free break to reset.
-*   **Focus Timer:** A basic 10-minute timer to get the ball rolling.
-*   **Your Moments:** Keeps a log of the stuff you actually finished.
-*   **XP and Levels:** Gamifies it a bit—you get XP for doing things offline.
+And the more I scroll, the harder it gets to actually do anything.
 
-## Why I made this
+So I wanted to try something different.
 
-Honestly, I noticed that whenever I'm stressed about school or procrastinating on an assignment, I just default to scrolling for hours. 
+Instead of making an AI that gives you more content to consume, **GO HUMAN gives you one small thing to do and then gets out of your way.**
 
-I wanted to build something where the AI doesn't try to keep you hooked on the app. It just gives you a little nudge, and the goal is for you to actually go do the thing offline.
+---
 
-## How it works
+## So... what does GO HUMAN actually do?
 
-You literally just type what's happening.
+You tell it what's going on.
 
-The app sends your message to my backend, which hits the Groq API to generate a quick response. It spits back:
+Something as simple as:
 
-1. A category
-2. A quick thought or reflection
-3. One actionable step
+> "I have a lot of schoolwork and I don't know where to start."
 
-For example: If you type *"I can't focus on my work,"* it might just tell you to put your phone in another room and focus on a single task for 10 minutes.
+GO HUMAN doesn't give you a 20-step productivity system.
+
+It gives you **one small next move**.
+
+Maybe it's:
+
+> Put your phone somewhere you can't reach it and work on just one task for 10 minutes.
+
+That's basically the whole idea.
+
+**Don't fix your entire life. Just do the next thing.**
+
+---
+
+## The Main Features
+
+### AI Next Move
+
+Describe what's happening and get a small, realistic action based on your situation.
+
+You can also ask for another move if the first suggestion doesn't feel right.
+
+### Focus, Connect & Recharge
+
+The suggestions aren't only about studying.
+
+GO HUMAN can give you ideas for:
+
+- **Focus** — when you can't start your work
+- **Connect** — when you've been isolating yourself
+- **Recharge** — when you probably just need to step away from the screen
+
+The goal is to make the suggestions feel like something a friend might actually tell you to do.
+
+### Focus Timer
+
+A simple timer for actually starting the thing instead of spending another 30 minutes planning to start it.
+
+### Your Moments
+
+After doing something in the real world, you can save it as a moment.
+
+It can be something small.
+
+Studied for an hour.
+
+Went outside.
+
+Talked to someone.
+
+Finished something you were avoiding.
+
+The point is that the app starts becoming a record of **things you actually did**, instead of things you planned to do.
+
+### Journal Flipbook
+
+Your saved moments can be viewed through a simple journal-style flipbook.
+
+I wanted this to feel more like looking through an old notebook than scrolling through another social media feed.
+
+### Life Stats
+
+GO HUMAN also keeps track of some of the patterns in your moments.
+
+Things like:
+
+- Things you've tried
+- People you've connected with
+- Things you've done outside
+- Memories you've captured
+- Your most common adventure categories
+
+It's a small way of seeing that you've actually been doing things.
+
+### XP & Rewards
+
+Completing quests gives you XP.
+
+As you progress, you can unlock rewards and customize parts of your experience.
+
+It's a little bit of gamification, but with one important difference:
+
+**The reward isn't staying in the app.**
+
+The reward is for actually doing something outside of it.
+
+---
+
+## Why I Made This
+
+I'm a college student, and honestly, I built this around a problem I already had.
+
+There are days when I know exactly what I should be doing.
+
+I have an assignment.
+
+I have something to study.
+
+I probably should sleep.
+
+But somehow I end up opening TikTok, YouTube, or Instagram "for a few minutes."
+
+Then an hour disappears.
+
+I realized that most apps are really good at giving me another reason to stay on my phone.
+
+So I wondered:
+
+**What if I made an app that did the opposite?**
+
+What if the AI's job wasn't to keep me engaged?
+
+What if its job was to help me leave?
+
+That's where GO HUMAN came from.
+
+---
+
+## The Idea Behind It
+
+The app is built around a really simple loop:
+
+**Feel stuck → Get one small move → Go do it → Come back → Save the moment → Keep going**
+
+The AI is only one part of that loop.
+
+The actual goal is everything that happens **after** the AI response.
+
+If GO HUMAN tells you to go outside and you actually go outside, that's a win.
+
+If it tells you to text a friend and you actually do it, that's a win.
+
+If it helps you finally start your assignment, that's a win.
+
+And honestly, if you close the app immediately after getting your next move...
+
+**that's probably the best outcome.**
+
+---
+
+## How It Works
+
+The basic flow is pretty simple.
+
+1. You tell GO HUMAN what's going on.
+2. The message is sent to my backend.
+3. The backend uses the Groq API to generate a contextual response.
+4. GO HUMAN turns that into a category, reflection, and actionable next move.
+5. You choose whether to do it.
+6. If you complete it, you can capture the moment in your journal.
+7. Your progress contributes to your stats, XP, and rewards.
+
+I intentionally kept the interaction simple because I didn't want the app itself to become another thing you have to figure out.
+
+---
 
 ## Built With
 
-*   React
-*   Vite
-*   JavaScript
-*   Node.js
-*   Groq API
-*   CSS
-*   LocalStorage
+- React
+- Vite
+- JavaScript
+- Node.js
+- Express
+- Groq API
+- CSS
+- LocalStorage
 
-## Running the project
+---
+
+## Running the Project
 
 First, install the dependencies:
 
@@ -50,26 +199,48 @@ First, install the dependencies:
 npm install
 ```
 
-Create a `.env` file in the project folder and add your Groq API key:
+Create a `.env` file in the project folder:
 
 ```text
 GROQ_API_KEY=your_api_key_here
 ```
 
-Then start the backend:
+Start the backend:
 
 ```bash
 node server.mjs
 ```
 
-In another terminal, start the frontend:
+Then, in another terminal:
 
 ```bash
 npm run dev
 ```
 
-Then just open the local URL Vite gives you.
+Open the local URL provided by Vite.
+
+---
 
 ## Project Status
 
-This is a hackathon project I made myself, so it's definitely still a work in progress. Expect some bugs and changes while I keep messing with the code.
+This is a hackathon project I built as a college student, so it's definitely not perfect.
+
+There are still things I want to improve, especially around mobile behavior, notifications, and some of the more advanced interactions.
+
+But the core idea is there.
+
+I wanted to see if I could build an AI experience where **success isn't measured by how long someone stays in the app.**
+
+It's measured by what they do after they leave it.
+
+---
+
+## One Last Thing
+
+Most AI apps ask:
+
+> **"What else can I help you with?"**
+
+GO HUMAN asks:
+
+> **"Okay. Now go do it."**

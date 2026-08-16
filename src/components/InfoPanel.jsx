@@ -9,16 +9,16 @@ function InfoPanel({ onClose }) {
 
         <div className="info-modal-body">
           <p>
-            GO HUMAN is a tiny companion for when your brain has too many tabs
-            open. Tell it what's going on, and it hands you back one small,
-            doable next move instead of a whole plan.
+            GO HUMAN is an AI companion for living a little more outside the
+            screen. Tell it what's going on, and it hands you back one small,
+            real thing to go do — not a whole plan.
           </p>
 
           <h3>🧭 Next move</h3>
           <p>
             Type whatever's on your mind. GO HUMAN turns it into one small
-            action you can actually start right now, with a short timer to
-            keep it low-pressure.
+            human quest — talk to someone, step outside, try something new,
+            or just slow down — with a short timer to keep it low-pressure.
           </p>
 
           <h3>🔎 Make It Smaller</h3>
@@ -27,7 +27,14 @@ function InfoPanel({ onClose }) {
             HUMAN will shrink it down into something easier to start.
           </p>
 
+          <h3>📓 Journal</h3>
+          <p>
+            Do the thing, then come back and tell us how it went. Your
+            journal keeps the small moments — so they don't just slip by.
+          </p>
+
           <h3>⭐ XP &amp; levels</h3>
+          
           <p>
             Finishing or making progress on a move earns XP. Collect enough
             and you level up — no streaks to break, no pressure to keep up.

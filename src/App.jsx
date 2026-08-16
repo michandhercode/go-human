@@ -897,16 +897,6 @@ function App() {
           <>
           <XpHud xp={xp} levelProgress={levelProgress} justGainedXp={justGainedXp} />
 
-          <RewardsPanel
-            isOpen={isRewardsOpen}
-            onClose={() => setIsRewardsOpen(false)}
-            unlockedRewardIds={unlockedRewardIds}
-            activeTheme={activeTheme}
-            activeAvatar={activeAvatar}
-            onSelectTheme={selectTheme}
-            onSelectAvatar={selectAvatar}
-          />
-
           {!activeAction && (
             <>
               <section className="hero">
@@ -1018,6 +1008,19 @@ function App() {
       </div>
 
       {isInfoOpen && <InfoPanel onClose={closeInfoPanel} />}
+
+      {/* Rendered at the app level (not inside the Dashboard-only block) so
+          REWARDS opens correctly from Journal, Moment History, or any other
+          view — not just the Dashboard. */}
+      <RewardsPanel
+        isOpen={isRewardsOpen}
+        onClose={() => setIsRewardsOpen(false)}
+        unlockedRewardIds={unlockedRewardIds}
+        activeTheme={activeTheme}
+        activeAvatar={activeAvatar}
+        onSelectTheme={selectTheme}
+        onSelectAvatar={selectAvatar}
+      />
 
       {isLifeStatsOpen && (
         <LifeStatsPanel
