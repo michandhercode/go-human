@@ -38,6 +38,15 @@ function Moments({ moments, selectedMomentIndexes, onToggleMoment, onRequestDele
                       <span className="moment-badge moment-badge--xp">
                         +{moment.xpEarned ?? ACTION_XP} XP
                       </span>
+                      {moment.outcome && (
+                        <span
+                          className={`moment-badge moment-badge--outcome moment-badge--outcome-${
+                            moment.outcome === "Progress" ? "progress" : "completed"
+                          }`}
+                        >
+                          {moment.outcome === "Progress" ? "🌱 PROGRESS" : "✨ COMPLETED"}
+                        </span>
+                      )}
                     </div>
 
                     <p className="moment-title">{moment.title ?? moment.action}</p>

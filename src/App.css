@@ -260,6 +260,18 @@ button {
   color: var(--ink);
 }
 
+.pixel-btn--success {
+  background: var(--success);
+  color: var(--ink);
+}
+
+.pixel-btn--muted {
+  background: transparent;
+  border-color: var(--muted);
+  color: var(--muted);
+  box-shadow: 0 4px 0 0 var(--muted);
+}
+
 .pixel-btn--wide {
   width: 100%;
   margin-top: 14px;
@@ -824,10 +836,22 @@ h1 {
   text-align: center;
 }
 
+.action-title {
+  margin: 0 0 6px;
+  color: var(--cream);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
 .action-description {
-  margin: 0 0 20px;
+  margin: 0 0 12px;
   color: var(--muted);
   line-height: 1.5;
+}
+
+.session-hint--commitment {
+  margin: 0 0 20px;
+  color: var(--accent);
 }
 
 .session-timer {
@@ -853,6 +877,62 @@ h1 {
   color: var(--muted);
   font-size: 0.82rem;
   line-height: 1.5;
+}
+
+/* --- Outcome question: "how did it go?" --- */
+.action-session--outcome {
+  border-color: var(--accent);
+}
+
+.outcome-question {
+  margin: 0 0 16px;
+  color: var(--cream);
+  font-family: var(--font-pixel);
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}
+
+.outcome-buttons {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.outcome-buttons .pixel-btn {
+  width: 100%;
+}
+
+.pixel-btn--extend {
+  width: 100%;
+  background: transparent;
+  border-color: var(--panel-border);
+  color: var(--muted);
+  font-size: 0.55rem;
+}
+
+/* --- "Not really" — supportive, no shame --- */
+.action-session--not-really {
+  border-color: var(--muted);
+  text-align: center;
+}
+
+.not-really-message {
+  margin: 0 0 18px;
+  color: var(--cream);
+  line-height: 1.5;
+}
+
+.not-really-buttons {
+  display: grid;
+  gap: 10px;
+}
+
+.not-really-buttons .pixel-btn {
+  width: 100%;
+}
+
+.action-session--progress {
+  border-color: var(--success);
 }
 
 .action-session--done {
@@ -985,6 +1065,14 @@ h1 {
 
 .moment-badge--xp {
   color: var(--amber);
+}
+
+.moment-badge--outcome-completed {
+  color: var(--success);
+}
+
+.moment-badge--outcome-progress {
+  color: var(--accent);
 }
 
 .moment-title {

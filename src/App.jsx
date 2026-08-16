@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
-import { getLevelProgress, ACTION_XP } from "./utils/xp";
+import { getLevelProgress, calculateOutcomeXp } from "./utils/xp";
 import { CHATBOX_THEMES, AVATARS, ALL_REWARDS } from "./utils/rewards";
 import { now } from "./utils/time";
 import PixelWorld from "./components/PixelWorld";
@@ -109,7 +109,7 @@ function App() {
   }, [activeAction]);
 
   useEffect(() => {
-    if (!activeAction?.isDone) return;
+    if (!activeAction?.isDone || activeAction.outcome) return;
 
     if (typeof Notification === "undefined" || Notification.permission !== "granted") {
       return;
@@ -117,12 +117,12 @@ function App() {
 
     try {
       new Notification("GO HUMAN", {
-        body: "Nice. You did the thing. ✨",
+        body: "Time's up. How did it go?",
       });
     } catch {
       // Notifications are best-effort; ignore failures.
     }
-  }, [activeAction?.isDone]);
+  }, [activeAction?.isDone, activeAction?.outcome]);
 
   const levelProgress = getLevelProgress(xp);
   const unlockedRewardIds = ALL_REWARDS.filter(
@@ -229,10 +229,19 @@ function App() {
       category: nextMove.category,
       title: option.title,
       description: option.description,
+      // optionSeconds is the original committed window — "try again" always
+      // resets back to this, even if the session was later extended.
+      optionSeconds: totalSeconds,
       totalSeconds,
       secondsLeft: totalSeconds,
       isRunning: true,
       isDone: false,
+      // No outcome has been reported yet. The timer finishing does NOT set
+      // this — only an explicit "I DID IT" / "I MADE SOME PROGRESS" /
+      // "NOT REALLY" tap does.
+      outcome: null,
+      isGeneratingSmaller: false,
+      smallerError: "",
     });
   }
 
@@ -246,28 +255,146 @@ function App() {
     setActiveAction(null);
   }
 
-  function finishAction() {
+  // The timer finishing is only a commitment window ending — it never awards
+  // XP or saves a moment on its own. XP and the saved moment only happen
+  // here, after the user explicitly reports what actually happened.
+  function reportOutcome(outcome) {
     if (!activeAction) return;
+
+    if (outcome === "notReally") {
+      // 0 XP, nothing saved. We just move into the supportive "what next"
+      // sub-choices (make it smaller / try again / done for now).
+      setActiveAction((current) => (current ? { ...current, outcome: "notReally" } : current));
+      return;
+    }
+
+    const committedMinutes = activeAction.optionSeconds / 60;
+    const xpAwarded = calculateOutcomeXp(committedMinutes, outcome);
 
     const moment = {
       category: activeAction.category,
       title: activeAction.title,
       description: activeAction.description,
       duration: Math.round(activeAction.totalSeconds / 60),
-      xpEarned: ACTION_XP,
+      xpEarned: xpAwarded,
+      outcome: outcome === "done" ? "Completed" : "Progress",
       completedAt: now(),
     };
 
     setMoments((currentMoments) => [moment, ...currentMoments]);
-    setXp((currentXp) => currentXp + ACTION_XP);
-    setActiveAction(null);
-    setNextMove(null);
-    setMessage("");
+    setXp((currentXp) => currentXp + xpAwarded);
+    setActiveAction((current) => (current ? { ...current, outcome } : current));
 
     setCompanionMood("celebrate");
     setJustGainedXp(true);
     setTimeout(() => setCompanionMood("idle"), 1400);
     setTimeout(() => setJustGainedXp(false), 900);
+  }
+
+  // "Keep going +5 min" — extends the commitment window. This never awards
+  // XP by itself; the final outcome still decides that.
+  function extendActionTimer() {
+    setActiveAction((current) =>
+      current
+        ? {
+            ...current,
+            totalSeconds: current.totalSeconds + 5 * 60,
+            secondsLeft: 5 * 60,
+            isRunning: true,
+            isDone: false,
+          }
+        : current
+    );
+  }
+
+  // "Try again" — resets back to the original committed duration and starts
+  // a fresh window on the same action. 0 XP.
+  function tryActionAgain() {
+    setActiveAction((current) =>
+      current
+        ? {
+            ...current,
+            totalSeconds: current.optionSeconds,
+            secondsLeft: current.optionSeconds,
+            isRunning: true,
+            isDone: false,
+            outcome: null,
+          }
+        : current
+    );
+  }
+
+  // "Make it smaller" — reuses the existing Groq-backed API architecture to
+  // ask GO HUMAN for a smaller version of the same action, then starts a new
+  // commitment window for it. 0 XP; nothing is saved until an outcome is
+  // reported for the new, smaller action.
+  async function makeActionSmaller() {
+    if (!activeAction) return;
+
+    setActiveAction((current) =>
+      current ? { ...current, isGeneratingSmaller: true, smallerError: "" } : current
+    );
+
+    try {
+      const apiUrl = import.meta.env.DEV
+        ? "http://localhost:3001/api/smaller-action"
+        : "/api/smaller-action";
+
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: activeAction.title,
+          description: activeAction.description,
+          category: activeAction.category,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Could not shrink that right now.");
+      }
+
+      const totalSeconds = Math.max(1, Math.round(data.duration * 60));
+
+      setActiveAction((current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          title: data.title,
+          description: data.description,
+          optionSeconds: totalSeconds,
+          totalSeconds,
+          secondsLeft: totalSeconds,
+          isRunning: true,
+          isDone: false,
+          outcome: null,
+          isGeneratingSmaller: false,
+          smallerError: "",
+        };
+      });
+    } catch (err) {
+      setActiveAction((current) =>
+        current
+          ? {
+              ...current,
+              isGeneratingSmaller: false,
+              smallerError: err.message || "Could not shrink that right now.",
+            }
+          : current
+      );
+    }
+  }
+
+  // Closes out the action session entirely (after a reported outcome, or
+  // "I'm done for now"). Never touches XP.
+  function closeActionSession() {
+    setActiveAction(null);
+    setNextMove(null);
+    setMessage("");
   }
 
   function selectTheme(themeId) {
@@ -400,7 +527,11 @@ function App() {
           sparkleUnlocked={sparkleUnlocked}
           onToggle={toggleActionTimer}
           onGiveUp={giveUpAction}
-          onFinish={finishAction}
+          onExtend={extendActionTimer}
+          onOutcome={reportOutcome}
+          onMakeSmaller={makeActionSmaller}
+          onTryAgain={tryActionAgain}
+          onClose={closeActionSession}
         />
 
         <Moments
