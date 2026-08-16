@@ -697,6 +697,16 @@ button {
   background: var(--amber);
 }
 
+.sound-toggle-btn {
+  padding: 9px 10px;
+  min-width: 40px;
+}
+
+.sound-toggle-btn.sound-toggle-btn--off {
+  color: var(--muted);
+  background: var(--panel);
+}
+
 /* ============================= REWARD CLOSET (drawer) ============================= */
 .rewards-drawer-backdrop {
   position: fixed;
@@ -887,6 +897,13 @@ button {
   position: relative;
   display: grid;
   place-items: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.companion:focus-visible {
+  outline: 2px dashed var(--accent);
+  outline-offset: 5px;
 }
 
 .companion--sm { width: 56px; height: 56px; }
@@ -1033,6 +1050,50 @@ button {
   width: 26%;
   height: 10%;
   top: 60%;
+}
+
+/* --- Pet reaction: a short, purely cosmetic overlay on top of whatever
+   mood is currently active. Doesn't move the companion or change layout —
+   just a quick squash/stretch bounce, a blush boost, and a little sparkle
+   that fades on its own. --- */
+.companion--petted .companion-body {
+  animation: companion-pet-bounce 0.6s ease-in-out;
+}
+
+@keyframes companion-pet-bounce {
+  0% { transform: translateY(0) scale(1, 1); }
+  25% { transform: translateY(2px) scale(1.08, 0.9); }
+  55% { transform: translateY(-9px) scale(0.94, 1.08); }
+  80% { transform: translateY(0) scale(1.03, 0.98); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+
+.companion--petted .companion-cheek {
+  opacity: 1;
+  transform: scale(1.6);
+  box-shadow: 0 0 6px rgba(244, 114, 182, 0.55);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+
+.companion--petted .companion-mouth {
+  width: 22%;
+  height: 8%;
+  border-radius: 40%;
+}
+
+.companion-pet-sparkle {
+  position: absolute;
+  top: -4px;
+  right: 8%;
+  font-size: 0.85em;
+  animation: companion-pet-sparkle-float 0.65s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes companion-pet-sparkle-float {
+  0% { transform: translateY(6px) scale(0.3); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translateY(-16px) scale(1); opacity: 0; }
 }
 
 .companion-accessory {
@@ -1201,16 +1262,26 @@ h1 {
   position: relative;
 }
 
+/* The bubble's own background is always a translucent theme tint (see
+   --bubble-bg above / --accent-soft fallback), so it takes on whatever is
+   behind it — the day/night + world-theme pixel sky. Its text therefore
+   needs to react the same way the hero text does, via the shared
+   --on-world-* tokens, instead of the fixed --cream/--accent panel colors
+   used by opaque, non-themed panels like the quest cards below. */
 .ai-bubble-eyebrow {
-  color: var(--bubble-accent, var(--accent));
+  color: var(--on-world-text);
+  text-shadow: var(--on-world-shadow);
   margin-bottom: 8px;
+  transition: color 0.4s ease;
 }
 
 .ai-message {
   margin: 0;
-  color: var(--cream);
+  color: var(--on-world-heading);
+  text-shadow: var(--on-world-shadow);
   font-size: 1.02rem;
   line-height: 1.55;
+  transition: color 0.4s ease;
 }
 
 .ai-bubble.theme-nature::after,
@@ -1240,12 +1311,15 @@ h1 {
   box-shadow: 0 0 14px rgba(56, 189, 248, 0.3), 4px 4px 0 0 var(--panel-border);
 }
 
+/* Sits directly on the world (no card behind it), same as the hero copy. */
 .options-heading {
   margin: 0 0 12px;
-  color: var(--muted);
+  color: var(--on-world-text);
+  text-shadow: var(--on-world-shadow);
   font-family: var(--font-pixel);
   font-size: 0.6rem;
   letter-spacing: 0.08em;
+  transition: color 0.4s ease;
 }
 
 .options-grid {
