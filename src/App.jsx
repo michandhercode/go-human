@@ -18,9 +18,10 @@ import InfoPanel from "./components/InfoPanel";
 import TopControls from "./components/TopControls";
 import Journal from "./components/Journal";
 import {
-  JOURNAL_STORAGE_KEY,
-  JOURNAL_CUSTOMIZATION_STORAGE_KEY,
   DEFAULT_JOURNAL_CUSTOMIZATION,
+  loadJournalState,
+  saveJournalState,
+  addEntryToAlbum,
   getEntryIcon,
   makeJournalId,
 } from "./utils/journal";
@@ -83,17 +84,18 @@ function App() {
   const [selectedMomentIndexes, setSelectedMomentIndexes] = useState([]);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
-  // --- Virtual Life Journal — entirely additive, own storage keys, never
-  // touches XP/rewards/onboarding/moments state above. ---
-  const [journalEntries, setJournalEntries] = useState(() => {
-    const saved = localStorage.getItem(JOURNAL_STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [];
-  });
+  // --- Virtual Life Journal — entirely additive, own storage key, never
+  // touches XP/rewards/onboarding/moments state above.
+  //
+  // journalState is the new v2, multi-album shape: { version, albums,
+  // entries }. loadJournalState() transparently migrates any old flat-array
+  // Journal (and any old go-human-journal-customization key) into it on
+  // first read. Until Phase 2 ships an album-picker UI, the Journal UI
+  // still works with a flat entry list and a single customization object,
+  // so we derive those from journalState below rather than changing the
+  // existing Journal/JournalEntry/JournalEditor/JournalCustomize components.
+  const [journalState, setJournalState] = useState(() => loadJournalState());
   const [isJournalOpen, setIsJournalOpen] = useState(false);
-  const [journalCustomization, setJournalCustomization] = useState(() => {
-    const saved = localStorage.getItem(JOURNAL_CUSTOMIZATION_STORAGE_KEY);
-    return saved ? { ...DEFAULT_JOURNAL_CUSTOMIZATION, ...JSON.parse(saved) } : DEFAULT_JOURNAL_CUSTOMIZATION;
-  });
 
   // --- day/night environment (NOT a reward — the base world's lighting).
   // Day is always the default on a fresh install; only a previously saved
@@ -133,12 +135,8 @@ function App() {
   }, [moments]);
 
   useEffect(() => {
-    localStorage.setItem(JOURNAL_STORAGE_KEY, JSON.stringify(journalEntries));
-  }, [journalEntries]);
-
-  useEffect(() => {
-    localStorage.setItem(JOURNAL_CUSTOMIZATION_STORAGE_KEY, JSON.stringify(journalCustomization));
-  }, [journalCustomization]);
+    saveJournalState(journalState);
+  }, [journalState]);
 
   useEffect(() => {
     localStorage.setItem("go-human-xp", xp);
@@ -599,23 +597,48 @@ function App() {
     setIsJournalOpen(false);
   }
 
+  // Routes a new entry through the album-aware data layer: it lands in the
+  // primary album if there's room, otherwise the capacity/overflow logic in
+  // addEntryToAlbum() finds (or creates) the next album for it. Until
+  // Phase 2 adds an album picker, "primary" is simply the first album.
   function addJournalEntry(entry) {
-    setJournalEntries((current) => [entry, ...current]);
+    setJournalState((current) => {
+      const preferredAlbumId = current.albums[0]?.id;
+      return addEntryToAlbum(current, entry, preferredAlbumId).state;
+    });
   }
 
   function updateJournalEntry(id, updates) {
-    setJournalEntries((current) =>
-      current.map((entry) => (entry.id === id ? { ...entry, ...updates } : entry))
-    );
+    setJournalState((current) => ({
+      ...current,
+      entries: current.entries.map((entry) => (entry.id === id ? { ...entry, ...updates } : entry)),
+    }));
   }
 
   function deleteJournalEntry(id) {
-    setJournalEntries((current) => current.filter((entry) => entry.id !== id));
+    setJournalState((current) => ({
+      ...current,
+      entries: current.entries.filter((entry) => entry.id !== id),
+    }));
   }
 
+  // Phase 1 still exposes a single customization object to the existing
+  // JournalCustomize UI, so this updates the primary (first) album's
+  // customization. Per-album customization already exists in the data
+  // model for Phase 2 to build on.
   function setJournalCustomizationField(field, value) {
     playSound("click");
-    setJournalCustomization((current) => ({ ...current, [field]: value }));
+    setJournalState((current) => {
+      const primaryAlbumId = current.albums[0]?.id;
+      return {
+        ...current,
+        albums: current.albums.map((album) =>
+          album.id === primaryAlbumId
+            ? { ...album, customization: { ...album.customization, [field]: value } }
+            : album
+        ),
+      };
+    });
   }
 
   // Optional "want to remember this?" save, offered right after a quest is
@@ -704,6 +727,11 @@ function App() {
 
   const currentUnlockToast = rewardUnlockQueue[0] ?? null;
   const sunriseGlow = activeAvatar?.worldTint === "sunrise";
+
+  // Flattened view over journalState for the existing (pre-Phase-2) Journal
+  // UI, which doesn't know about albums yet.
+  const journalEntries = journalState.entries;
+  const journalCustomization = journalState.albums[0]?.customization ?? DEFAULT_JOURNAL_CUSTOMIZATION;
 
   return (
     <main

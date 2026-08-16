@@ -1,3 +1,5 @@
+import { now } from "./time";
+
 // Dedicated Journal storage — completely separate from XP, rewards,
 // onboarding, day/night, sound, and Moments storage. Never read or write
 // any of those keys from here.
@@ -10,6 +12,233 @@ export const DEFAULT_JOURNAL_CUSTOMIZATION = {
   frame: "pixel",
   stickerPack: "basic",
 };
+
+// --- Album system (Phase 1: data model only) ---
+
+// Bumped when the on-disk shape changes. v1 = flat array of entries.
+// v2 = { version: 2, albums: [...], entries: [...] } with each entry
+// carrying an albumId.
+export const JOURNAL_STATE_VERSION = 2;
+
+export const DEFAULT_ALBUM_NAME = "My Journey";
+
+// A "memory"/page limit, not a photo limit — photo+note, photo-only, and
+// text-only entries all count as exactly one entry each toward this cap.
+export const MAX_ENTRIES_PER_ALBUM = 10;
+
+export function makeAlbumId() {
+  return `album-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+// Renders a small integer as an uppercase roman numeral. Only ever called
+// with small, human-scale album counts, but written generally so it never
+// silently breaks if someone accumulates a lot of albums.
+function toRoman(num) {
+  const numerals = [
+    [1000, "M"], [900, "CM"], [500, "D"], [400, "CD"],
+    [100, "C"], [90, "XC"], [50, "L"], [40, "XL"],
+    [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"],
+  ];
+  let n = num;
+  let result = "";
+  for (const [value, symbol] of numerals) {
+    while (n >= value) {
+      result += symbol;
+      n -= value;
+    }
+  }
+  return result;
+}
+
+// Strips a trailing " II" / " III" / etc. roman-numeral suffix so we can
+// re-derive the "family" name an overflow album should continue.
+function baseAlbumName(name) {
+  const stripped = String(name ?? "").replace(/\s+[IVXLCDM]+$/i, "").trim();
+  return stripped || DEFAULT_ALBUM_NAME;
+}
+
+// Given the album names that already exist, returns the next predictable,
+// non-duplicate name in the same family as seedName — e.g. "My Journey" ->
+// "My Journey II" -> "My Journey III".
+export function nextAlbumName(existingNames, seedName = DEFAULT_ALBUM_NAME) {
+  const base = baseAlbumName(seedName);
+  const taken = new Set(existingNames);
+  let n = 2;
+  let candidate = `${base} ${toRoman(n)}`;
+  while (taken.has(candidate)) {
+    n += 1;
+    candidate = `${base} ${toRoman(n)}`;
+  }
+  return candidate;
+}
+
+export function createAlbum({
+  id,
+  name = DEFAULT_ALBUM_NAME,
+  subtitle = "",
+  createdAt,
+  customization,
+} = {}) {
+  return {
+    id: id || makeAlbumId(),
+    name,
+    subtitle,
+    createdAt: createdAt ?? now(),
+    customization: { ...DEFAULT_JOURNAL_CUSTOMIZATION, ...(customization || {}) },
+  };
+}
+
+export function createFreshJournalState() {
+  return {
+    version: JOURNAL_STATE_VERSION,
+    albums: [createAlbum({ name: DEFAULT_ALBUM_NAME })],
+    entries: [],
+  };
+}
+
+export function countAlbumEntries(state, albumId) {
+  return state.entries.filter((entry) => entry.albumId === albumId).length;
+}
+
+export function isAlbumFull(state, albumId) {
+  return countAlbumEntries(state, albumId) >= MAX_ENTRIES_PER_ALBUM;
+}
+
+// Finds an album with room, preferring preferredAlbumId if it still has
+// space. Falls through the remaining albums in order. Returns null if every
+// existing album is full (the caller should create a new one).
+export function findNextAvailableAlbum(state, preferredAlbumId) {
+  const preferred = state.albums.find((album) => album.id === preferredAlbumId);
+  if (preferred && !isAlbumFull(state, preferred.id)) return preferred;
+
+  const available = state.albums.find((album) => !isAlbumFull(state, album.id));
+  return available || null;
+}
+
+// Migrates the legacy flat-array Journal ([{ id, type, title, ... }, ...])
+// into the v2 { version, albums, entries } shape. Every existing entry is
+// preserved exactly as-is (including base64 photo data) other than gaining
+// an albumId that points at a single new default album, so nothing is
+// duplicated or lost.
+export function migrateV1ToV2(flatEntries, legacyCustomization) {
+  const defaultAlbum = createAlbum({
+    id: "default",
+    name: DEFAULT_ALBUM_NAME,
+    createdAt: flatEntries[flatEntries.length - 1]?.date ?? now(),
+    customization: legacyCustomization,
+  });
+
+  const entries = flatEntries.map((entry) => ({
+    ...entry,
+    albumId: "default",
+  }));
+
+  return {
+    version: JOURNAL_STATE_VERSION,
+    albums: [defaultAlbum],
+    entries,
+  };
+}
+
+// Accepts whatever shape happens to be in localStorage (nothing, a v1 flat
+// array, a v2 state, or something malformed) and returns a well-formed v2
+// state. legacyCustomization, when provided, is folded into the migrated
+// default album's customization — it is never deleted by this function.
+export function normalizeJournalState(raw, legacyCustomization) {
+  if (!raw) return createFreshJournalState();
+
+  if (Array.isArray(raw)) {
+    if (raw.length === 0) return createFreshJournalState();
+    return migrateV1ToV2(raw, legacyCustomization);
+  }
+
+  if (typeof raw === "object" && Array.isArray(raw.albums) && Array.isArray(raw.entries)) {
+    // Already v2 (or forward-compatible). Guard against a malformed/empty
+    // albums list so there is always somewhere for new entries to land.
+    if (raw.albums.length === 0) {
+      const fallback = createAlbum({ id: "default", name: DEFAULT_ALBUM_NAME });
+      return {
+        version: JOURNAL_STATE_VERSION,
+        albums: [fallback],
+        entries: raw.entries.map((entry) => ({ ...entry, albumId: entry.albumId || fallback.id })),
+      };
+    }
+    return { version: JOURNAL_STATE_VERSION, albums: raw.albums, entries: raw.entries };
+  }
+
+  // Unrecognized shape — don't guess, don't wipe anything the caller might
+  // still have a reference to; just hand back a fresh state.
+  return createFreshJournalState();
+}
+
+export function loadJournalState() {
+  let rawJournal;
+  try {
+    const saved = localStorage.getItem(JOURNAL_STORAGE_KEY);
+    rawJournal = saved ? JSON.parse(saved) : null;
+  } catch {
+    rawJournal = null;
+  }
+
+  let legacyCustomization;
+  try {
+    const savedCustomization = localStorage.getItem(JOURNAL_CUSTOMIZATION_STORAGE_KEY);
+    legacyCustomization = savedCustomization ? JSON.parse(savedCustomization) : null;
+  } catch {
+    legacyCustomization = null;
+  }
+
+  const state = normalizeJournalState(rawJournal, legacyCustomization);
+
+  // Persist the migration/normalization result immediately so subsequent
+  // loads read v2 directly. We intentionally do NOT delete the legacy
+  // go-human-journal-customization key here — Phase 1 only reads it.
+  saveJournalState(state);
+
+  return state;
+}
+
+export function saveJournalState(state) {
+  localStorage.setItem(JOURNAL_STORAGE_KEY, JSON.stringify(state));
+}
+
+// Adds an entry to state, honoring the per-album capacity: it saves into
+// preferredAlbumId when there's room, falls back to another non-full album,
+// and otherwise creates a new album (predictably named after the preferred
+// album's family) to hold it. Pure function — returns a new state plus the
+// id of the album the entry actually landed in, so the caller always knows
+// where it went.
+export function addEntryToAlbum(state, entry, preferredAlbumId) {
+  const target = findNextAvailableAlbum(state, preferredAlbumId);
+
+  if (target) {
+    const savedEntry = { ...entry, albumId: target.id };
+    return {
+      state: { ...state, entries: [savedEntry, ...state.entries] },
+      albumId: target.id,
+    };
+  }
+
+  // Every existing album is full — spin up the next one in the sequence.
+  const seedAlbum =
+    state.albums.find((album) => album.id === preferredAlbumId) ||
+    state.albums[state.albums.length - 1];
+  const existingNames = state.albums.map((album) => album.name);
+  const newAlbum = createAlbum({
+    name: nextAlbumName(existingNames, seedAlbum?.name),
+    customization: seedAlbum?.customization,
+  });
+  const savedEntry = { ...entry, albumId: newAlbum.id };
+
+  return {
+    state: {
+      ...state,
+      albums: [...state.albums, newAlbum],
+      entries: [savedEntry, ...state.entries],
+    },
+    albumId: newAlbum.id,
+  };
+}
 
 // --- Presets. All customization is pick-one-from-a-list — no free-form
 // editor. unlockLevel 0 means "always available". ---
