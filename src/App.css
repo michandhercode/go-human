@@ -23,6 +23,15 @@
 
   --notch: 8px;
   --notch-sm: 6px;
+
+  /* Readable-on-world text tokens — for text sitting directly on the pixel
+     sky/ground (the hero section), which changes with Day/Night + World
+     Theme. Everything else (panels, cards, buttons) keeps its fixed
+     --cream/--muted/--ink colors, since panels never change color. This
+     root value is the fallback (matches the plain night look). */
+  --on-world-heading: #fdf6e3;
+  --on-world-text: #cabfe6;
+  --on-world-shadow: 0 0 5px rgba(155, 139, 255, 0.4);
 }
 
 body {
@@ -59,36 +68,146 @@ button {
   flex-direction: column;
 }
 
-.app.theme-nature {
+/* ============================= DAY / NIGHT ENVIRONMENT ============================= */
+/* This is the base lighting layer — NOT a reward. It always applies, and
+   equipped world themes below layer their own identity on top of it. */
+.app--env-day {
+  --sky-top: #7ec8f2;
+  --sky-bottom: #dff3ff;
+  --ground-color: #7fbf6a;
+  --ground-accent: #4f9c47;
+  --sun-color: #ffe27a;
+  --sun-glow: rgba(255, 226, 122, 0.55);
+  /* Bright sky → dark, readable heading/text with a soft light shadow
+     underneath (a pixel-style "outline", not a modern blur glow). */
+  --on-world-heading: #1f2a44;
+  --on-world-text: #3c4a6b;
+  --on-world-shadow: 1px 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.app--env-night {
+  --sky-top: #241a3d;
+  --sky-bottom: #120c1e;
+  --ground-color: #2a2044;
+  --ground-accent: #4a3a70;
+  --moon-color: #f4f1ff;
+  --on-world-heading: #fdf6e3;
+  --on-world-text: #cabfe6;
+  --on-world-shadow: 0 0 5px rgba(155, 139, 255, 0.4);
+}
+
+/* ============================= WORLD THEME REWARDS ============================= */
+/* Each equipped theme combines with day/night rather than overwriting it —
+   see the .app--env-day / .app--env-night variants below. */
+
+/* 🌿 Nature — bright green world by day, moonlit greens by night */
+.app.theme-nature.app--env-day {
+  --sky-top: #a9e6a1;
+  --sky-bottom: #eafce6;
+  --accent: #3fae5f;
+  --ground-color: #5fae46;
+  --ground-accent: #3f8a34;
+  --on-world-heading: #14361f;
+  --on-world-text: #2f5c2a;
+  --on-world-shadow: 1px 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.app.theme-nature.app--env-night {
   --sky-top: #16321f;
   --sky-bottom: #0c1c11;
   --accent: #4ade80;
-  --ground-color: #24401f;
-  --ground-accent: #5fae46;
+  --ground-color: #1b3018;
+  --ground-accent: #2f5c2a;
+  --on-world-heading: #eafce6;
+  --on-world-text: #b9e6ad;
+  --on-world-shadow: 0 0 5px rgba(74, 222, 128, 0.4);
 }
 
-.app.theme-night {
+/* 🌙 Night Owl — its own deep-blue identity; softer/lighter by day since the
+   "night" is the theme's personality, not the literal time of day. */
+.app.theme-night.app--env-day {
+  --sky-top: #bcdcfb;
+  --sky-bottom: #eef6ff;
+  --accent: #2f8fd0;
+  --ground-color: #2d4470;
+  --ground-accent: #4d6ea3;
+  --on-world-heading: #10233f;
+  --on-world-text: #26466e;
+  --on-world-shadow: 1px 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.app.theme-night.app--env-night {
   --sky-top: #0e1b3a;
   --sky-bottom: #070c1c;
   --accent: #38bdf8;
   --ground-color: #101a30;
   --ground-accent: #223357;
+  --on-world-heading: #eaf6ff;
+  --on-world-text: #a9d9f7;
+  --on-world-shadow: 0 0 5px rgba(56, 189, 248, 0.45);
 }
 
-.app.theme-retro {
+/* 🎮 Retro — arcade palette, brighter by day, moodier by night */
+.app.theme-retro.app--env-day {
+  --sky-top: #ffb8e0;
+  --sky-bottom: #fde8f4;
+  --accent: #e0459d;
+  --ground-color: #6a2a6e;
+  --ground-accent: #f472b6;
+  --on-world-heading: #3a0f2e;
+  --on-world-text: #5c1f49;
+  --on-world-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.app.theme-retro.app--env-night {
   --sky-top: #2c1240;
   --sky-bottom: #170a24;
   --accent: #f472b6;
   --ground-color: #1c0e2e;
   --ground-accent: #f472b6;
+  --on-world-heading: #ffe3f3;
+  --on-world-text: #f4b8dd;
+  --on-world-shadow: 0 0 5px rgba(244, 114, 182, 0.45);
 }
 
-.app.theme-golden {
-  --sky-top: #3a2a10;
-  --sky-bottom: #1c1409;
+/* 🌟 Golden Hour — the big milestone reward. Warm and glowing by day; keeps
+   the night sky but adds warm golden accents rather than disappearing. */
+.app.theme-golden.app--env-day {
+  --sky-top: #ffb35c;
+  --sky-bottom: #ffe9b8;
+  --accent: #e8a521;
+  --ground-color: #caa53c;
+  --ground-accent: #a97d1f;
+  --sun-color: #ffb347;
+  --sun-glow: rgba(255, 179, 71, 0.65);
+  --on-world-heading: #3a2405;
+  --on-world-text: #5c3c10;
+  --on-world-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.app.theme-golden.app--env-night {
+  --sky-top: #2c1a12;
+  --sky-bottom: #170c08;
   --accent: #facc15;
   --ground-color: #3a2a10;
   --ground-accent: #caa53c;
+  --moon-color: #ffdca0;
+  --on-world-heading: #fff2d6;
+  --on-world-text: #f0cf8a;
+  --on-world-shadow: 0 0 6px rgba(250, 204, 21, 0.5);
+}
+
+/* 🌅 Sunrise Mode (companion cosmetic) — a small ambient warm tint layered
+   on top of whatever else is equipped, so it "does something" to the world
+   without becoming a full second theme. */
+.app--sunrise-glow {
+  --sun-color: #ffb37a;
+  --sun-glow: rgba(255, 150, 110, 0.6);
+}
+
+.app--sunrise-glow.app--env-day {
+  --sky-top: #ffcf9e;
+  --sky-bottom: #ffe9cf;
 }
 
 /* ============================= PIXEL WORLD BG ============================= */
@@ -197,6 +316,174 @@ button {
   height: 10px;
   background: var(--ground-accent);
   transition: background 0.6s ease;
+}
+
+/* --- Sun (day) --- */
+.pixel-world-sun {
+  position: absolute;
+  top: 10%;
+  right: 14%;
+  width: 46px;
+  height: 46px;
+  background: var(--sun-color, #ffe27a);
+  clip-path: polygon(
+    35% 0%, 65% 0%, 65% 15%, 85% 5%, 80% 25%, 100% 35%,
+    100% 65%, 80% 75%, 85% 95%, 65% 85%, 65% 100%, 35% 100%,
+    35% 85%, 15% 95%, 20% 75%, 0% 65%, 0% 35%, 20% 25%, 15% 5%, 35% 15%
+  );
+  transition: background 0.6s ease;
+}
+
+.sun-glow {
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--sun-glow, rgba(255, 226, 122, 0.55)) 0%, transparent 70%);
+  z-index: -1;
+}
+
+.pixel-world--golden .pixel-world-sun,
+.pixel-world--sunrise-glow .pixel-world-sun {
+  width: 58px;
+  height: 58px;
+}
+
+/* --- Sunrise Mode: noticeable sun rays + warm horizon glow --- */
+.pixel-world-sun-rays {
+  position: absolute;
+  top: 10%;
+  right: 14%;
+  width: 46px;
+  height: 46px;
+  pointer-events: none;
+}
+
+.sun-ray {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3px;
+  height: 34px;
+  background: linear-gradient(180deg, var(--sun-color, #ffb37a) 0%, transparent 100%);
+  opacity: 0.55;
+  transform-origin: top center;
+  transform: translate(-50%, -100%) rotate(calc(var(--ray-index) * 45deg));
+  animation: ray-pulse 3.2s ease-in-out infinite;
+  animation-delay: calc(var(--ray-index) * 0.15s);
+}
+
+@keyframes ray-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.75; }
+}
+
+.pixel-world-horizon-glow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 56px;
+  height: 40%;
+  background: linear-gradient(180deg, transparent 0%, rgba(255, 150, 100, 0.28) 100%);
+  pointer-events: none;
+}
+
+/* --- Moon (night) --- */
+.pixel-world-moon {
+  position: absolute;
+  top: 9%;
+  right: 16%;
+  width: 34px;
+  height: 34px;
+  background: var(--moon-color, #f4f1ff);
+  clip-path: polygon(
+    20% 0%, 80% 0%, 80% 20%, 100% 20%, 100% 80%, 80% 80%,
+    80% 100%, 20% 100%, 20% 80%, 0% 80%, 0% 20%, 20% 20%
+  );
+}
+
+.moon-crater {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.moon-crater-1 { width: 6px; height: 6px; top: 30%; left: 22%; }
+.moon-crater-2 { width: 4px; height: 4px; top: 55%; left: 55%; }
+
+/* --- Nature: floating leaves --- */
+.pixel-world-leaves {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.leaf {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--ground-accent);
+  clip-path: polygon(0% 50%, 50% 0%, 100% 50%, 50% 100%);
+  opacity: 0.7;
+  animation: leaf-fall 9s linear infinite;
+}
+
+.leaf-0 { top: -10%; left: 12%; animation-delay: 0s; }
+.leaf-1 { top: -10%; left: 44%; animation-delay: 3s; }
+.leaf-2 { top: -10%; left: 74%; animation-delay: 6s; }
+.pixel-world-leaves .leaf:nth-child(4) { left: 28%; animation-delay: 1.5s; }
+.pixel-world-leaves .leaf:nth-child(5) { left: 60%; animation-delay: 4.5s; }
+.pixel-world-leaves .leaf:nth-child(6) { left: 88%; animation-delay: 7.5s; }
+
+@keyframes leaf-fall {
+  0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.7; }
+  90% { opacity: 0.7; }
+  100% { transform: translateY(70vh) translateX(16px) rotate(140deg); opacity: 0; }
+}
+
+/* --- Retro: arcade grid floor --- */
+.pixel-world-retro-grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 56px;
+  height: 90px;
+  opacity: 0.35;
+  background-image:
+    linear-gradient(var(--accent) 1px, transparent 1px),
+    linear-gradient(90deg, var(--accent) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: linear-gradient(to top, black, transparent);
+  -webkit-mask-image: linear-gradient(to top, black, transparent);
+}
+
+/* --- Golden Hour: drifting motes --- */
+.pixel-world-golden-particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.golden-mote {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--sun-color, #ffb347);
+  opacity: 0.7;
+  animation: golden-drift 6s ease-in-out infinite;
+}
+
+.golden-mote-0 { top: 20%; left: 15%; animation-delay: 0s; }
+.golden-mote-1 { top: 35%; left: 70%; animation-delay: 1s; }
+.golden-mote-2 { top: 55%; left: 30%; animation-delay: 2s; }
+.golden-mote-3 { top: 65%; left: 85%; animation-delay: 3s; }
+.pixel-world-golden-particles .golden-mote:nth-child(5) { top: 15%; left: 50%; animation-delay: 0.5s; }
+.pixel-world-golden-particles .golden-mote:nth-child(6) { top: 45%; left: 10%; animation-delay: 1.5s; }
+.pixel-world-golden-particles .golden-mote:nth-child(7) { top: 75%; left: 55%; animation-delay: 2.5s; }
+.pixel-world-golden-particles .golden-mote:nth-child(8) { top: 25%; left: 90%; animation-delay: 3.5s; }
+
+@keyframes golden-drift {
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50% { transform: translateY(-14px); opacity: 0.9; }
 }
 
 /* ============================= PIXEL FRAME / BUTTON UTILITIES ============================= */
@@ -367,29 +654,143 @@ button {
   line-height: 1.6;
 }
 
-/* ============================= REWARDS ============================= */
-.rewards {
-  margin-bottom: 24px;
+/* ============================= TOP CONTROLS ============================= */
+.top-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.icon-toggle-btn {
+  --pf-notch: var(--notch-sm);
+  font-family: var(--font-pixel);
+  font-size: 0.58rem;
+  letter-spacing: 0.02em;
+  color: var(--cream);
+  background: var(--panel-raised);
+  border: 3px solid var(--panel-border);
+  box-shadow: 0 3px 0 0 var(--panel-border);
+  padding: 9px 12px;
+  transform: translateY(0);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  clip-path: polygon(
+    0 var(--pf-notch), var(--pf-notch) var(--pf-notch), var(--pf-notch) 0,
+    calc(100% - var(--pf-notch)) 0, calc(100% - var(--pf-notch)) var(--pf-notch), 100% var(--pf-notch),
+    100% calc(100% - var(--pf-notch)), calc(100% - var(--pf-notch)) calc(100% - var(--pf-notch)), calc(100% - var(--pf-notch)) 100%,
+    var(--pf-notch) 100%, var(--pf-notch) calc(100% - var(--pf-notch)), 0 calc(100% - var(--pf-notch))
+  );
+}
+
+.icon-toggle-btn:hover {
+  transform: translateY(-1px);
+}
+
+.icon-toggle-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 0 var(--panel-border);
+}
+
+.rewards-trigger {
+  color: var(--ink);
+  background: var(--amber);
+}
+
+/* ============================= REWARD CLOSET (drawer) ============================= */
+.rewards-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 24;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  background: rgba(10, 6, 18, 0.72);
+}
+
+.rewards-drawer {
+  width: 100%;
+  max-width: 480px;
+  max-height: 82vh;
+  overflow-y: auto;
+  padding-bottom: 28px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.rewards-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.rewards-drawer-title {
+  margin: 0;
+}
+
+.rewards-drawer-close {
+  padding: 8px 12px;
+}
+
+.rewards-equipped-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.rewards-equipped-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 2px solid var(--panel-border);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.rewards-equipped-label {
+  color: var(--muted);
+  font-family: var(--font-pixel);
+  font-size: 0.5rem;
+  letter-spacing: 0.06em;
+}
+
+.rewards-equipped-value {
+  color: var(--cream);
+  font-size: 0.82rem;
 }
 
 .rewards-caption {
-  margin: 0 0 14px;
+  margin: 0 0 18px;
   color: var(--muted);
   font-size: 0.85rem;
   line-height: 1.4;
 }
 
+.rewards-section {
+  margin-bottom: 20px;
+}
+
+.rewards-section-label {
+  margin: 0 0 10px;
+  color: var(--accent);
+  font-family: var(--font-pixel);
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+}
+
 .rewards-grid {
-  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
   gap: 12px;
-  overflow-x: auto;
-  padding: 4px 4px 10px;
-  -webkit-overflow-scrolling: touch;
 }
 
 .item-slot {
   position: relative;
-  flex: 0 0 108px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -407,10 +808,6 @@ button {
   color: var(--muted);
   opacity: 0.55;
   filter: grayscale(0.4);
-}
-
-.item-slot:disabled {
-  cursor: default;
 }
 
 .item-slot-emoji {
@@ -452,6 +849,25 @@ button {
   font-size: 0.55rem;
 }
 
+.item-slot-equip-btn {
+  margin-top: 2px;
+  padding: 5px 10px;
+  border: 2px solid var(--panel-border);
+  background: var(--accent);
+  color: var(--ink);
+  font-family: var(--font-pixel);
+  font-size: 0.55rem;
+  letter-spacing: 0.02em;
+}
+
+.item-slot-equip-btn:hover {
+  filter: brightness(1.08);
+}
+
+.item-slot-equip-btn--active {
+  background: var(--success);
+}
+
 /* ============================= COMPANION ============================= */
 .companion-stage {
   display: flex;
@@ -486,6 +902,20 @@ button {
   height: 10px;
   background: rgba(0, 0, 0, 0.35);
   clip-path: polygon(10% 0, 90% 0, 100% 50%, 90% 100%, 10% 100%, 0 50%);
+}
+
+.companion-warm-halo {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 179, 122, 0.45) 0%, transparent 68%);
+  animation: halo-pulse 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes halo-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.75; }
+  50% { transform: scale(1.12); opacity: 1; }
 }
 
 .companion-body {
@@ -544,15 +974,17 @@ button {
 
 .companion-eye {
   position: absolute;
-  top: 42%;
-  width: 9%;
-  height: 9%;
+  top: 38%;
+  width: 13%;
+  height: 13%;
   background: var(--ink);
+  border-radius: 30%;
+  box-shadow: inset -2px -2px 0 rgba(255, 255, 255, 0.25);
   animation: companion-blink 4.6s steps(1) infinite;
 }
 
-.companion-eye--left { left: 32%; }
-.companion-eye--right { right: 32%; }
+.companion-eye--left { left: 28%; }
+.companion-eye--right { right: 28%; }
 
 @keyframes companion-blink {
   0%, 92%, 100% { transform: scaleY(1); }
@@ -580,7 +1012,21 @@ button {
   width: 16%;
   height: 6%;
   background: var(--ink);
+  border-radius: 2px;
 }
+
+.companion-foot {
+  position: absolute;
+  bottom: -4%;
+  width: 16%;
+  height: 8%;
+  background: var(--companion-body, #a5b4fc);
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+}
+
+.companion-foot--left { left: 16%; }
+.companion-foot--right { right: 16%; }
 
 .companion--celebrate .companion-mouth,
 .companion--levelup .companion-mouth {
@@ -664,26 +1110,44 @@ button {
   margin-bottom: 4px;
 }
 
+/* The hero's label/heading/tagline/subtitle sit directly on the pixel-world
+   sky (no panel behind them), so unlike panel text they need to react to
+   the active Day/Night + World Theme combo instead of using fixed
+   --cream/--muted colors. Driven entirely by the --on-world-* tokens set
+   per env/theme above — switching Day/Night or equipping a theme updates
+   these automatically, no JS needed. */
+.hero .eyebrow {
+  color: var(--on-world-heading);
+  text-shadow: var(--on-world-shadow);
+  transition: color 0.4s ease;
+}
+
 h1 {
   margin: 6px 0 0;
   font-family: var(--font-pixel);
   font-size: 1.5rem;
   line-height: 1.4;
-  color: var(--cream);
+  color: var(--on-world-heading);
+  text-shadow: var(--on-world-shadow);
+  transition: color 0.4s ease;
 }
 
 .tagline {
   margin: 0 0 6px;
-  color: var(--muted);
+  color: var(--on-world-text);
   font-size: 0.9rem;
   font-style: italic;
+  text-shadow: var(--on-world-shadow);
+  transition: color 0.4s ease;
 }
 
 .subtitle {
   margin: 14px auto 20px;
   max-width: 330px;
-  color: var(--muted);
+  color: var(--on-world-text);
   line-height: 1.5;
+  text-shadow: var(--on-world-shadow);
+  transition: color 0.4s ease;
 }
 
 .pixel-input {
@@ -1281,7 +1745,15 @@ h1 {
     font-size: 2.8rem;
   }
 
-  .item-slot {
-    flex-basis: 92px;
+  .rewards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  }
+
+  .rewards-equipped-row {
+    grid-template-columns: 1fr;
+  }
+
+  .top-controls {
+    flex-wrap: wrap;
   }
 }

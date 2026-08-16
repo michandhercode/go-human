@@ -11,7 +11,7 @@ function RewardUnlockToast({ reward, onEquip, onDismiss }) {
           {reward.emoji}
         </p>
         <p className="unlock-toast-name">{reward.name.toUpperCase()}</p>
-        <p className="unlock-toast-desc">Your GO HUMAN world now has {reward.tagline}.</p>
+        <p className="unlock-toast-desc">{reward.tagline}</p>
 
         <div className="unlock-toast-buttons">
           {isEquippable && (

@@ -46,6 +46,14 @@ function App() {
   const [selectedMomentIndexes, setSelectedMomentIndexes] = useState([]);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
+  // --- day/night environment (NOT a reward — the base world's lighting).
+  // Day is always the default on a fresh install; only a previously saved
+  // manual preference can change that.
+  const [dayNight, setDayNight] = useState(
+    () => localStorage.getItem("go-human-daynight") || "day"
+  );
+  const [isRewardsOpen, setIsRewardsOpen] = useState(false);
+
   // --- pixel-world presentation state (purely visual, derived from the systems above) ---
   const [companionMood, setCompanionMood] = useState("idle");
   const [showLevelUp, setShowLevelUp] = useState(false);
@@ -89,6 +97,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem("go-human-seen-rewards", JSON.stringify(seenRewardIds));
   }, [seenRewardIds]);
+
+  useEffect(() => {
+    localStorage.setItem("go-human-daynight", dayNight);
+  }, [dayNight]);
 
   useEffect(() => {
     if (!activeAction || !activeAction.isRunning) return;
@@ -397,6 +409,10 @@ function App() {
     setMessage("");
   }
 
+  function toggleDayNight() {
+    setDayNight((current) => (current === "day" ? "night" : "day"));
+  }
+
   function selectTheme(themeId) {
     setSelectedThemeId((current) => (current === themeId ? null : themeId));
   }
@@ -432,15 +448,42 @@ function App() {
   }
 
   const currentUnlockToast = rewardUnlockQueue[0] ?? null;
+  const sunriseGlow = activeAvatar?.worldTint === "sunrise";
 
   return (
-    <main className={`app${activeTheme ? ` ${activeTheme.className}` : ""}`}>
-      <PixelWorld themeId={activeTheme?.id} />
+    <main
+      className={`app app--env-${dayNight}${activeTheme ? ` ${activeTheme.className}` : ""}${
+        sunriseGlow ? " app--sunrise-glow" : ""
+      }`}
+    >
+      <PixelWorld themeId={activeTheme?.id} dayNight={dayNight} sunriseGlow={sunriseGlow} />
 
       <div className="app-content">
+        <div className="top-controls">
+          <button
+            type="button"
+            className="icon-toggle-btn"
+            onClick={toggleDayNight}
+            aria-label={dayNight === "day" ? "Switch to Night mode" : "Switch to Day mode"}
+          >
+            {dayNight === "day" ? "☀️ DAY" : "🌙 NIGHT"}
+          </button>
+
+          <button
+            type="button"
+            className="icon-toggle-btn rewards-trigger"
+            onClick={() => setIsRewardsOpen(true)}
+            aria-label="Open Reward Closet"
+          >
+            🎁 REWARDS
+          </button>
+        </div>
+
         <XpHud xp={xp} levelProgress={levelProgress} justGainedXp={justGainedXp} />
 
         <RewardsPanel
+          isOpen={isRewardsOpen}
+          onClose={() => setIsRewardsOpen(false)}
           unlockedRewardIds={unlockedRewardIds}
           activeTheme={activeTheme}
           activeAvatar={activeAvatar}

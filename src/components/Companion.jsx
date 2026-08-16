@@ -14,6 +14,8 @@ function Companion({ avatar, mood = "idle", size = "md" }) {
     <div className={`companion companion--${size} companion--${mood}`}>
       <div className="companion-shadow" />
 
+      {skin.accessory === "sun" && <span className="companion-warm-halo" aria-hidden="true" />}
+
       <div
         className="companion-body"
         style={{
@@ -21,6 +23,8 @@ function Companion({ avatar, mood = "idle", size = "md" }) {
           "--companion-cheek": skin.cheeks,
         }}
       >
+        <span className="companion-foot companion-foot--left" aria-hidden="true" />
+        <span className="companion-foot companion-foot--right" aria-hidden="true" />
         {skin.accessory === "sun" && (
           <div className="companion-accessory companion-accessory--sun" aria-hidden="true">
             <span />
